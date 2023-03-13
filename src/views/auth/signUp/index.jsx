@@ -97,7 +97,7 @@ function SignUp() {
       >
         <Box me="auto">
           <Heading color={textColor} fontSize="36px" mb="10px">
-            Sign Up
+            S'inscrire
           </Heading>
           <Text
             mb="36px"
@@ -106,7 +106,7 @@ function SignUp() {
             fontWeight="400"
             fontSize="md"
           >
-            Enter your email and password to sign up!
+            Créer un compte pour continuer
           </Text>
         </Box>
         <Flex
@@ -151,7 +151,7 @@ function SignUp() {
               color={textColor}
               display="flex"
             >
-              Password<Text color={brandStars}>*</Text>
+              Mot de passe<Text color={brandStars}>*</Text>
             </FormLabel>
             <InputGroup size="md">
               <Input
@@ -183,7 +183,7 @@ function SignUp() {
               mb="24px"
               onClick={handleSignUp}
             >
-              Sign Up
+              S'inscrire
             </Button>
           </FormControl>
           <Flex mb="24px">
@@ -199,7 +199,7 @@ function SignUp() {
             mt="0px"
           >
             <Text color={textColorDetails} fontWeight="400" fontSize="14px">
-              Already registered?
+              Déjà un compte?
               <NavLink to="/auth/sign-in">
                 <Text
                   color={textColorBrand}
@@ -207,7 +207,7 @@ function SignUp() {
                   ms="5px"
                   fontWeight="500"
                 >
-                  Sign In
+                  Se connecter
                 </Text>
               </NavLink>
             </Text>
