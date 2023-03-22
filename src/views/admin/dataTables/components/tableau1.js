@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Thead, Tbody, Tr, Th, Td, Button, Box } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
+import qs from "qs";
 
 const Tableau = () => {
   const { user } = React.useContext(AuthContext);
@@ -22,10 +23,9 @@ const Tableau = () => {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.post(token_url, token_payload, {
+      const { data } = await axios.post(token_url, qs.stringify(token_payload), {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "Access-Control-Allow-Origin": "*",
         },
       });
 
