@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 // Firebase auth functions
 import {
   signInWithEmailAndPassword,
@@ -7,9 +7,13 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   onAuthStateChanged,
-} from 'firebase/auth';
+} from "firebase/auth";
 // Firebase auth instance
-import firebaseAuth from 'lib/firebase';
+import firebaseAuth from "lib/firebase";
+import { createUserDocument } from "lib/firebase";
+import { db } from "lib/firebase";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+
 // Google oauth provider
 const provider = new GoogleAuthProvider();
 // Contexts
@@ -24,7 +28,8 @@ export const ContextProvider = (props) => {
     onAuthStateChanged(firebaseAuth, (user) => {
       if (user) {
         setIsSignedIn(true);
-        setUser(user);
+        getUserData(user);
+        // setUser(user);
       } else {
         setIsSignedIn(false);
         setUser(null);
@@ -41,9 +46,17 @@ export const ContextProvider = (props) => {
       return err.message;
     }
   };
-  const signUp = async (email, password) => {
+  const signUp = async (email, password, salesCode) => {
     try {
-      await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      const { user } = await createUserWithEmailAndPassword(
+        firebaseAuth,
+        email,
+        password
+      );
+
+      if (user) {
+        await createUserDocument(user, { salesCode });
+      }
       return;
     } catch (err) {
       console.log(err.message);
@@ -64,6 +77,36 @@ export const ContextProvider = (props) => {
       console.log(err.message);
     }
   };
+
+  const createUserDocument = async (user, additionalData) => {
+    const { email } = user;
+    const { salesCode } = additionalData;
+    try {
+      await addDoc(collection(db, "users"), {
+        salesCode,
+        email,
+        createdAt: new Date(),
+      });
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const getUserData = async (user) => {
+    try {
+      const q = query(
+        collection(db, "users"),
+        where("email", "==", `${user.email}`)
+      );
+
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        setUser({ ...user, profileData: doc.data() });
+      });
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
   // Context provider
   return (
     <AuthContext.Provider
@@ -74,6 +117,7 @@ export const ContextProvider = (props) => {
         signUp,
         signOut,
         googleSignIn,
+        getUserData,
       }}
     >
       {props.children}
