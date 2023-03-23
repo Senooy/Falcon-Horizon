@@ -1,48 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { Table, Thead, Tbody, Tr, Th, Td, Button, Box } from "@chakra-ui/react";
+import { Table, Thead, Tbody, Tr, Th, Td, Box } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
+import ReactPaginate from "react-paginate";
+import "./pagination.css";
+import Loader from "components/loader";
+
+const PER_PAGE = 10;
 
 const Tableau = () => {
   const { user } = React.useContext(AuthContext);
   const [records, setRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [recordsPerPage, setRecordsPerPage] = useState(10);
-  const token_url = "https://login.salesforce.com/services/oauth2/token";
-
-  const token_payload = {
-    grant_type: "password",
-    client_id:
-      "3MVG9I5UQ_0k_hTlxl9SwXkHaaX5kX0qAYQOq8c.PkG5DFWIFEwsrzI496JZ.GmBIIHFqnwDc75JvefLHSe.7",
-    client_secret:
-      "352231377BC938C6935CBC9E243BF1180120947E65594D9EC35A6F230E3DFAA4",
-    username: "falcon@api.circet",
-    password: "Younes59200-9jWI0f3cPXYm2OJr94rZMu1Z",
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.post(token_url, token_payload, {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Access-Control-Allow-Origin": "*",
-        },
-      });
-
-      if (data) {
-        const { data: salesData } = await axios.get(
-          `https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/${user.profileData.salesCode}/Sales__r`,
-          {
-            headers: {
-              Authorization: `Bearer ${data.accessToken}`,
-            },
-          }
-        );
-
-        setRecords(salesData);
-      }
+      setIsLoading(true);
+      const { data } = await axios.get(
+        "http://app.falconmarketing.fr:3001/api/salesforce_data?salesCode=" +
+          `${user.profileData.salesCode}`
+      );
+      setIsLoading(false);
+      setRecords(data.records);
     } catch (error) {
       console.log(error);
+      setIsLoading(false);
     }
   };
 
@@ -50,20 +33,13 @@ const Tableau = () => {
     fetchData();
   }, [user]);
 
-  function handleClick(event) {
-    setCurrentPage(Number(event.target.id));
+  function handlePageClick({ selected: selectedPage }) {
+    setCurrentPage(selectedPage);
   }
 
-  // Index de début et de fin de la section d'enregistrements à afficher
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = records.slice(indexOfFirstRecord, indexOfLastRecord);
+  const offset = currentPage * PER_PAGE;
 
-  // Affichage des numéros de page
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(records.length / recordsPerPage); i++) {
-    pageNumbers.push(i);
-  }
+  const pageCount = Math.ceil(records.length / PER_PAGE);
 
   return (
     <Box w={{ base: "100%", md: "100%" }} mx="auto" className="table-container">
@@ -89,7 +65,7 @@ const Tableau = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {currentRecords.map((record) => (
+          {records.slice(offset, offset + PER_PAGE).map((record) => (
             <Tr key={record.Id}>
               <Td>{record.TchProspectName__c}</Td>
               <Td>{record.TchAddress__c}</Td>
@@ -101,20 +77,21 @@ const Tableau = () => {
           ))}
         </Tbody>
       </Table>
-      <div>
-        {pageNumbers.map((number) => (
-          <Button
-            key={number}
-            id={number}
-            onClick={handleClick}
-            size="sm"
-            colorScheme={currentPage === number ? "blue" : "gray"}
-            ml={2}
-          >
-            {number}
-          </Button>
-        ))}
-      </div>
+
+      <Box>
+        <ReactPaginate
+          previousLabel={"← Previous"}
+          nextLabel={"Next →"}
+          pageCount={pageCount}
+          onPageChange={handlePageClick}
+          containerClassName={"pagination"}
+          previousLinkClassName={"pagination__link"}
+          nextLinkClassName={"pagination__link"}
+          disabledClassName={"pagination__link--disabled"}
+          activeClassName={"pagination__link--active"}
+        />
+      </Box>
+      {isLoading && <Loader />}
     </Box>
   );
 };
