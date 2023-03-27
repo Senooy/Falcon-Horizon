@@ -34,17 +34,32 @@ const Tableau = () => {
   };
 
   const formatDate = (date) => {
+    if (!date) {
+      return "";
+    }
     const d = new Date(date);
-    return `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
+    return isNaN(d.getTime())
+      ? ""
+      : `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
   };
-
+  
   const sortRecords = (records) => {
-    return records.sort((a, b) =>
-      sortConfig.ascending
-        ? new Date(a[sortConfig.key]) - new Date(b[sortConfig.key])
-        : new Date(b[sortConfig.key]) - new Date(a[sortConfig.key])
-    );
+    return records.sort((a, b) => {
+      const dateA = new Date(a[sortConfig.key]);
+      const dateB = new Date(b[sortConfig.key]);
+      if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) {
+        return 0;
+      }
+      if (isNaN(dateA.getTime())) {
+        return sortConfig.ascending ? 1 : -1;
+      }
+      if (isNaN(dateB.getTime())) {
+        return sortConfig.ascending ? -1 : 1;
+      }
+      return sortConfig.ascending ? dateA - dateB : dateB - dateA;
+    });
   };
+  
 
   const toggleSortDirection = (key) => {
     setSortConfig((prevConfig) => {
@@ -54,6 +69,7 @@ const Tableau = () => {
       };
     });
   };
+
 
   useEffect(() => {
     fetchData();
