@@ -13,6 +13,10 @@ const Tableau = () => {
   const [records, setRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [sortConfig, setSortConfig] = useState({
+    key: "ConnectingDatePlanned__c",
+    ascending: true,
+  });
 
   const fetchData = async () => {
     try {
@@ -29,6 +33,28 @@ const Tableau = () => {
     }
   };
 
+  const formatDate = (date) => {
+    const d = new Date(date);
+    return `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
+  };
+
+  const sortRecords = (records) => {
+    return records.sort((a, b) =>
+      sortConfig.ascending
+        ? new Date(a[sortConfig.key]) - new Date(b[sortConfig.key])
+        : new Date(b[sortConfig.key]) - new Date(a[sortConfig.key])
+    );
+  };
+
+  const toggleSortDirection = (key) => {
+    setSortConfig((prevConfig) => {
+      return {
+        key: key,
+        ascending: prevConfig.key === key ? !prevConfig.ascending : true,
+      };
+    });
+  };
+
   useEffect(() => {
     fetchData();
   }, [user]);
@@ -40,6 +66,8 @@ const Tableau = () => {
   const offset = currentPage * PER_PAGE;
 
   const pageCount = Math.ceil(records.length / PER_PAGE);
+
+  const sortedRecords = sortRecords(records);
 
   return (
     <Box w={{ base: "100%", md: "100%" }} mx="auto" className="table-container">
@@ -56,22 +84,29 @@ const Tableau = () => {
       <Table variant="simple">
         <Thead>
           <Tr>
+            <Th onClick={() => toggleSortDirection("CreatedDate")} style={{ cursor: "pointer" }}>
+              Date de la vente
+            </Th>
             <Th>Nom</Th>
             <Th>Adresse</Th>
             <Th>Numéro de téléphone</Th>
             <Th>Raccordement</Th>
-            <Th>Date de raccordement</Th>
+            <Th onClick={() => toggleSortDirection("ConnectingDatePlanned__c")} style={{ cursor: "pointer" }}>
+              Date de raccordement
+            </Th>
             <Th>Status</Th>
           </Tr>
         </Thead>
+
         <Tbody>
-          {records.slice(offset, offset + PER_PAGE).map((record) => (
+          {sortedRecords.slice(offset, offset + PER_PAGE).map((record) => (
             <Tr key={record.Id}>
+              <Td>{formatDate(record.CreatedDate)}</Td>
               <Td>{record.TchProspectName__c}</Td>
               <Td>{record.TchAddress__c}</Td>
               <Td>{record.ProspectMobilePhone__c}</Td>
               <Td>{record.ConnectionStatus__c}</Td>
-              <Td>{record.ConnectingDatePlanned__c}</Td>
+              <Td>{formatDate(record.ConnectingDatePlanned__c)}</Td>
               <Td>{record.Status__c}</Td>
             </Tr>
           ))}
@@ -92,7 +127,7 @@ const Tableau = () => {
         />
       </Box>
       {isLoading && <Loader />}
-    </Box>
+      </Box>
   );
 };
 
