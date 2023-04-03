@@ -5,6 +5,7 @@ import { AuthContext } from "contexts/AuthContext";
 import ReactPaginate from "react-paginate";
 import "./pagination.css";
 import Loader from "components/loader";
+import StatusPieChart from './StatusPieChart';
 
 const PER_PAGE = 10;
 
@@ -96,7 +97,7 @@ const Tableau = () => {
           overflow: auto;
         }
       `}</style>
-
+<StatusPieChart data={records} />
       <Table variant="simple">
         <Thead>
           <Tr>
@@ -141,6 +142,7 @@ const Tableau = () => {
           disabledClassName={"pagination__link--disabled"}
           activeClassName={"pagination__link--active"}
         />
+        
       </Box>
       {isLoading && <Loader />}
       </Box>

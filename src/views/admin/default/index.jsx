@@ -60,8 +60,6 @@ import tableDataComplex from "views/admin/default/variables/tableDataComplex.jso
 import Tableau from "../dataTables/components/tableau1";
 import PieChart from "components/charts/PieChart";
 import BarChart from "components/charts/BarChart";
-import Camembert from "../dataTables/components/camembert";
-import Fromage from "./components/camembert";
 
 import {
   lineChartDataOverallRevenue,
