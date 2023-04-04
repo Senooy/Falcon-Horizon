@@ -1,20 +1,24 @@
-// Chakra imports
 import { Box, Flex, Text, Select, useColorModeValue } from "@chakra-ui/react";
-// Custom components
 import Card from "components/card/Card.js";
 import { VSeparator } from "components/separator/Separator";
 import React from "react";
 
-export default function Conversion(props) {
-  const { ...rest } = props;
-
-  // Chakra Color Mode
+export default function Conversion({ salesData, ...rest }) {
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const cardColor = useColorModeValue("white", "navy.700");
   const cardShadow = useColorModeValue(
     "0px 18px 40px rgba(112, 144, 176, 0.12)",
     "unset"
   );
+
+  const totalSales = salesData.reduce((acc, item) => acc + item.value, 0);
+
+  const percentage = (value) => ((value / totalSales) * 100).toFixed(2);
+
+  // Remplacez les valeurs ci-dessous par les valeurs appropriées pour vos catégories
+  const yourFilesValue = 1;
+  const systemValue = 2;
+
   return (
     <Card p='20px' align='center' direction='column' w='100%' {...rest}>
       <Flex
@@ -55,11 +59,11 @@ export default function Conversion(props) {
               color='secondaryGray.600'
               fontWeight='700'
               mb='5px'>
-              Your files
+              Vos fichiers
             </Text>
           </Flex>
           <Text fontSize='lg' color={textColor} fontWeight='700'>
-            63%
+            {percentage(yourFilesValue)}%
           </Text>
         </Flex>
         <VSeparator mx={{ base: "60px", xl: "60px", "2xl": "60px" }} />
@@ -71,14 +75,14 @@ export default function Conversion(props) {
               color='secondaryGray.600'
               fontWeight='700'
               mb='5px'>
-              System
+              Système
             </Text>
           </Flex>
           <Text fontSize='lg' color={textColor} fontWeight='700'>
-            25%
-          </Text>
+            {percentage(systemValue)}
+            </Text>
         </Flex>
-      </Card>
+        </Card>
     </Card>
-  );
+    );
 }
