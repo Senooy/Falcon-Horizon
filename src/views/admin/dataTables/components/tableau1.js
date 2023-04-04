@@ -138,8 +138,8 @@ const Tableau = () => {
       
         <Box>
           <ReactPaginate
-            previousLabel={"← Précédent"}
-            nextLabel={"Suivant →"}
+            previousLabel={"←"}
+            nextLabel={"→"}
             pageCount={pageCount}
             onPageChange={handlePageClick}
             containerClassName={"pagination"}
