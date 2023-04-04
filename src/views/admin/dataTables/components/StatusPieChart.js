@@ -14,7 +14,8 @@ const StatusPieChart = ({ data }) => {
 
   const [periode, setPeriode] = useState('jour');
 
-  const chartData = data.reduce((acc, record) => {
+  const chartData = data
+  .reduce((acc, record) => {
     const statusIndex = acc.findIndex((item) => item.name === record.Status__c);
     if (statusIndex !== -1) {
       acc[statusIndex].value += 1;
@@ -22,7 +23,9 @@ const StatusPieChart = ({ data }) => {
       acc.push({ name: record.Status__c, value: 1 });
     }
     return acc;
-  }, []);
+  }, [])
+  .sort((a, b) => a.name.localeCompare(b.name));
+
 
   const total = chartData.reduce((acc, item) => acc + item.value, 0);
 
