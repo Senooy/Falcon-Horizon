@@ -41,7 +41,6 @@ const StatusPieChart = ({ data }) => {
   return (
     <Box width="100%" height="400px">
       <ResponsiveContainer>
-        
         <PieChart>
           <Pie
             data={chartData}

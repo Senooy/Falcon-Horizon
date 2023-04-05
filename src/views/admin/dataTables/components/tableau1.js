@@ -1,18 +1,35 @@
 import React, { useEffect, useState } from "react";
-import { Table, Thead, Tbody, Tr, Th, Td, Box, Flex } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  useColorMode,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Collapse,
+  VStack,
+  Text,
+  ButtonGroup,
+  Button,
+} from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
 import ReactPaginate from "react-paginate";
 import "./pagination.css";
 import Loader from "components/loader";
-import StatusPieChart from './StatusPieChart';
+import StatusPieChart from "./StatusPieChart";
 import { FaAngleDown } from "react-icons/fa";
 
 const PER_PAGE = 10;
 
 const Tableau = () => {
+  const { colorMode } = useColorMode();
   const { user } = React.useContext(AuthContext);
   const [records, setRecords] = useState([]);
+  const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [sortConfig, setSortConfig] = useState({
@@ -20,6 +37,7 @@ const Tableau = () => {
     ascending: false,
   });
   const [collapsedRowId, setCollapsedRowId] = useState(null);
+  const [filter, setFilter] = useState("Tous");
 
   const fetchData = async () => {
     try {
@@ -30,6 +48,7 @@ const Tableau = () => {
       );
       setIsLoading(false);
       setRecords(data.records);
+      setFilteredRecords(data.records);
     } catch (error) {
       console.log(error);
       setIsLoading(false);
@@ -43,9 +62,11 @@ const Tableau = () => {
     const d = new Date(date);
     return isNaN(d.getTime())
       ? ""
-      : `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
+      : `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}/${d.getFullYear()}`;
   };
-  
+
   const sortRecords = (records) => {
     return records.sort((a, b) => {
       const dateA = new Date(a[sortConfig.key]);
@@ -62,7 +83,6 @@ const Tableau = () => {
       return sortConfig.ascending ? dateA - dateB : dateB - dateA;
     });
   };
-  
 
   const toggleSortDirection = (key) => {
     setSortConfig((prevConfig) => {
@@ -80,8 +100,50 @@ const Tableau = () => {
       setCollapsedRowId(rowId);
     }
   };
-  
 
+  const handleFilter = (filter) => {
+    const now = new Date();
+    let filtered = [];
+
+    if (filter === "Tous") {
+      filtered = records;
+    } else
+    {
+      const oneDay = 24 * 60 * 60 * 1000;
+    
+      switch (filter) {
+        case "Semaine":
+          filtered = records.filter((record) => {
+            const recordDate = new Date(record.CreatedDate);
+            const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
+            return diffDays <= 7;
+          });
+          break;
+    
+        case "Mois":
+          filtered = records.filter((record) => {
+            const recordDate = new Date(record.CreatedDate);
+            const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
+            return diffDays <= 30;
+          });
+          break;
+    
+        case "Année":
+          filtered = records.filter((record) => {
+            const recordDate = new Date(record.CreatedDate);
+            const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
+            return diffDays <= 365;
+          });
+          break;
+    
+        default:
+          break;
+      }
+    }
+    
+    setFilteredRecords(filtered);
+    setFilter(filter);
+  };
 
   useEffect(() => {
   fetchData();
@@ -93,122 +155,152 @@ const Tableau = () => {
   
   const offset = currentPage * PER_PAGE;
   
-  const pageCount = Math.ceil(records.length / PER_PAGE);
+  const pageCount = Math.ceil(filteredRecords.length / PER_PAGE);
   
-  const sortedRecords = sortRecords(records).map((record) => ({
+  const sortedRecords = sortRecords(filteredRecords).map((record) => ({
   ...record,
   CreatedDate: formatDate(record.CreatedDate),
-  ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
+  ConnectingDatePlanned__c: formatDate(record.ConnectingDate__c),
   }));
   
   return (
-      <Box
-        w={{ base: "100%", md: "100%" }}
-        mx="auto"
-        className="table-container"
-        style={{
-          backgroundColor: "white",
-          borderRadius: "5px",
-          boxShadow: "0 0 5px 1px rgba(0, 0, 0, 0.1)",
-          padding: "10px",
-          overflow: "auto",
-          maxHeight: "600px", // Ajoutez la hauteur maximale souhaitée ici
-          maxWidth: "100%", // Ajoutez la largeur maximale souhaitée ici
-          minHeight: "300px", // Ajoutez la hauteur minimale souhaitée ici
-          minWidth: "300px", // Ajoutez la largeur minimale souhaitée ici
-        }}
-      >
-  <StatusPieChart data={records} />
+  <Box
+  w={{ base: "100%", md: "100%" }}
+  mx="auto"
+  className="table-container"
+  style={{
+  backgroundColor: colorMode === "light" ? "white" : "gray.700",
+  borderRadius: "5px",
+  boxShadow: "0 0 5px 1px rgba(0, 0, 0, 0.1)",
+  padding: "10px",
+  overflow: "auto",
+  maxHeight: "600px",
+  maxWidth: "100%",
+  minHeight: "300px",
+  minWidth: "300px",
+  }}
+  >
+  <StatusPieChart data={filteredRecords} />
 
-  <div style={{ marginTop: '60px' }}></div>
-    <Table variant="striped">
+    <div style={{ marginTop: "60px" }}></div>
+
+  <ButtonGroup isAttached mt={4} mb={4}>
+    <Button
+      colorScheme={filter === "Tous" ? "blue" : "gray"}
+      onClick={() => handleFilter("Tous")}
+    >
+      Tous
+    </Button>
+    <Button
+      colorScheme={filter === "Semaine" ? "blue" : "gray"}
+      onClick={() => handleFilter("Semaine")}
+    >
+      Semaine
+    </Button>
+    <Button
+      colorScheme={filter === "Mois" ? "blue" : "gray"}
+      onClick={() => handleFilter("Mois")}
+    >
+      Mois
+    </Button>
+    <Button
+      colorScheme={filter === "Année" ? "blue" : "gray"}
+      onClick={() => handleFilter("Année")}
+    >
+      Année
+    </Button>
+  </ButtonGroup>
+
+  <Table variant="simple">
     <Thead>
-  <Tr>
-    <Th>Détails</Th>
-    <Th onClick={() => toggleSortDirection("CreatedDate")} style={{ cursor: "pointer" }}>
-      Date de la vente
-    </Th>
-    <Th>Nom</Th>
-    <Th>Adresse</Th>
-  </Tr>
-</Thead>
-
-<Tbody>
-  {sortedRecords.slice(offset, offset + PER_PAGE).map((record, index) => (
-    <React.Fragment key={record.Id}>
       <Tr>
-        <Td onClick={() => handleCollapseToggle(record.Id)} style={{ cursor: "pointer" }}>
-          {record.TchPhone__c} <FaAngleDown />
-        </Td>
-        <Td>{record.CreatedDate}</Td>
-        <Td>{record.TchProspectName__c}</Td>
-        <Td>{record.TchAddress__c}</Td>
+        <Th>Détails</Th>
+        <Th
+          onClick={() => toggleSortDirection("CreatedDate")}
+          style={{ cursor: "pointer" }}
+        >
+          Date de la vente
+        </Th>
+        <Th>Nom</Th>
+        <Th>Adresse</Th>
       </Tr>
+    </Thead>
 
-      {collapsedRowId === record.Id && (
-  <Box display={collapsedRowId === record.Id ? "table-row-group" : "none"}>
-    <Tr>
-      <Td colSpan="4">
-        <Flex direction="column" mt={2} mb={2}>
-          <Box>
-            <strong>Mobile :</strong> <a href="tel:{record.ProspectMobilePhone__c}" style={{ color: "blue" }}>{record.ProspectMobilePhone__c}</a>
-          </Box>
-          <Box>
-            <strong>Offre :</strong> {record.OfferName__c}
-          </Box>
-          <Box>
-            <strong>Famille de l'offre :</strong> {record.FamilyOffer__c}
-          </Box>
-          <Box>
-            <strong>Date de signature :</strong> {formatDate(record.SignatureDate__c)}
-          </Box>
-          <Box>
-            <strong>Date de validation :</strong> {formatDate(record.ValidationDate__c)}
-          </Box>
-          <Box>
-            <strong>Type de vente :</strong> {record.CustomerType__c}
-          </Box>
-          <Box>
-            <strong>Numéro de commande :</strong> {record.OrderNumber__c}
-          </Box>
-          <Box>
-            <strong>Numéro de panier :</strong> {record.BasketNumber__c}
-          </Box>
-          <Box>
-            <strong>Commentaire du call :</strong> {record.Comment__c}
-          </Box>
-        </Flex>
-      </Td>
-    </Tr>
-  </Box>
-)}
+    <Tbody>
+      {sortedRecords
+.slice(offset, offset + PER_PAGE)
+.map((record, index) => (
+<React.Fragment key={record.Id}>
+<Tr>
+<Td
+onClick={() => handleCollapseToggle(record.Id)}
+style={{ cursor: "pointer" }}
+>
+{record.TchPhone__c} <FaAngleDown />
+</Td>
+<Td>{record.CreatedDate}</Td>
+<Td>{record.TchProspectName__c}</Td>
+<Td>{record.TchAddress__c}</Td>
+</Tr>
 
-
-
-    </React.Fragment>
-  ))}
-</Tbody>
-
-    </Table>
-  
+<Collapse in={collapsedRowId === record.Id}>
     <Box>
-      <ReactPaginate
-        previousLabel={"←"}
-        nextLabel={"→"}
-        pageCount={pageCount}
-        onPageChange={handlePageClick}
-        containerClassName={"pagination"}
-        previousLinkClassName={"pagination__link"}
-        nextLinkClassName={"pagination__link"}
-        disabledClassName={"pagination__link--disabled"}
-        activeClassName={"pagination__link--active"}
-      />
-      
+      <VStack align="start" mt={2} mb={2}>
+        <Text>
+          <strong>Mobile :</strong>{" "}
+          <a
+            href="tel:{record.ProspectMobilePhone__c}"
+            style={{ color: "blue" }}
+          >
+            {record.ProspectMobilePhone__c}
+          </a>
+        </Text>
+        <Text>
+          <strong>Offre :</strong> {record.OfferName__c}
+        </Text>
+        <Text>
+          <strong>Famille de l'offre :</strong> {record.FamilyOffer__c}
+        </Text>
+        <Text>
+          <strong>Date de signature :</strong>{" "}
+          {formatDate(record.SignatureDate__c)}
+        </Text>
+        <Text>
+          <strong>Date de validation :</strong>{" "}
+          {formatDate(record.ValidationDate__c)}
+        </Text>
+        <Text>
+          <strong>Type de vente :</strong> {record.CustomerType__c}
+        </Text>
+        <Text>
+          <strong>Numéro de commande :</strong> {record.OrderNumber__c}
+        </Text>
+        <Text>
+          <strong>Numéro de panier :</strong> {record.BasketNumber__c}
+        </Text>
+        <Text>
+          <strong>Commentaire du call :</strong> {record.Comment__c}
+        </Text>
+      </VStack>
     </Box>
-    {isLoading && <Loader />}
-  </Box>
+  </Collapse>
+</React.Fragment>
+))}
+
+</Tbody>
+</Table>
+<ReactPaginate
+previousLabel={"←"}
+nextLabel={"→"}
+pageCount={pageCount}
+onPageChange={handlePageClick}
+containerClassName={"pagination"}
+previousLinkClassName={"pagination__link"}
+nextLinkClassName={"pagination__link"}
+disabledClassName={"pagination__link--disabled"}
+activeClassName={"pagination__link--active"}
+/>
+</Box>
 );
 };
-
 export default Tableau;
-
