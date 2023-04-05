@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Table, Thead, Tbody, Tr, Th, Td, Box } from "@chakra-ui/react";
+import { Table, Thead, Tbody, Tr, Th, Td, Box, Flex } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
 import ReactPaginate from "react-paginate";
 import "./pagination.css";
 import Loader from "components/loader";
 import StatusPieChart from './StatusPieChart';
-import PieCard from "views/admin/default/components/PieCard";
+import { FaAngleDown } from "react-icons/fa";
 
 const PER_PAGE = 10;
 
@@ -19,6 +19,7 @@ const Tableau = () => {
     key: "CreatedDate",
     ascending: false,
   });
+  const [collapsedRowId, setCollapsedRowId] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -72,87 +73,142 @@ const Tableau = () => {
     });
   };
 
+  const handleCollapseToggle = (rowId) => {
+    if (collapsedRowId === rowId) {
+      setCollapsedRowId(null);
+    } else {
+      setCollapsedRowId(rowId);
+    }
+  };
+  
+
+
   useEffect(() => {
-    fetchData();
+  fetchData();
   }, [user]);
-
+  
   function handlePageClick({ selected: selectedPage }) {
-    setCurrentPage(selectedPage);
+  setCurrentPage(selectedPage);
   }
-
+  
   const offset = currentPage * PER_PAGE;
-
+  
   const pageCount = Math.ceil(records.length / PER_PAGE);
-
+  
   const sortedRecords = sortRecords(records).map((record) => ({
-    ...record,
-    CreatedDate: formatDate(record.CreatedDate),
-    ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
+  ...record,
+  CreatedDate: formatDate(record.CreatedDate),
+  ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
   }));
-
+  
   return (
-    <Box w={{ base: "100%", md: "100%" }} mx="auto" className="table-container">
-      <style jsx>{`
-        .table-container {
-          background-color: white;
-          border-radius: 5px;
-          box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.1);
-          padding: 10px;
-          overflow: auto;
-        }
-        `}</style>
-        <StatusPieChart data={records} />
+      <Box
+        w={{ base: "100%", md: "100%" }}
+        mx="auto"
+        className="table-container"
+        style={{
+          backgroundColor: "white",
+          borderRadius: "5px",
+          boxShadow: "0 0 5px 1px rgba(0, 0, 0, 0.1)",
+          padding: "10px",
+          overflow: "auto",
+          maxHeight: "600px", // Ajoutez la hauteur maximale souhaitée ici
+          maxWidth: "100%", // Ajoutez la largeur maximale souhaitée ici
+          minHeight: "300px", // Ajoutez la hauteur minimale souhaitée ici
+          minWidth: "300px", // Ajoutez la largeur minimale souhaitée ici
+        }}
+      >
+  <StatusPieChart data={records} />
 
-        <div style={{ marginTop: '60px' }}></div>
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th onClick={() => toggleSortDirection("CreatedDate")} style={{ cursor: "pointer" }}>
-                Date de la vente
-              </Th>
-              <Th>Nom</Th>
-              <Th>Adresse</Th>
-              <Th>Numéro de téléphone</Th>
-              <Th>Raccordement</Th>
-              <Th onClick={() => toggleSortDirection("ConnectingDatePlanned__c")} style={{ cursor: "pointer" }}>
-                Date de raccordement
-              </Th>
-              <Th>Status</Th>
-            </Tr>
-          </Thead>
+  <div style={{ marginTop: '60px' }}></div>
+    <Table variant="striped">
+    <Thead>
+  <Tr>
+    <Th>Détails</Th>
+    <Th onClick={() => toggleSortDirection("CreatedDate")} style={{ cursor: "pointer" }}>
+      Date de la vente
+    </Th>
+    <Th>Nom</Th>
+    <Th>Adresse</Th>
+  </Tr>
+</Thead>
+
+<Tbody>
+  {sortedRecords.slice(offset, offset + PER_PAGE).map((record, index) => (
+    <React.Fragment key={record.Id}>
+      <Tr>
+        <Td onClick={() => handleCollapseToggle(record.Id)} style={{ cursor: "pointer" }}>
+          {record.TchPhone__c} <FaAngleDown />
+        </Td>
+        <Td>{record.CreatedDate}</Td>
+        <Td>{record.TchProspectName__c}</Td>
+        <Td>{record.TchAddress__c}</Td>
+      </Tr>
+
+      {collapsedRowId === record.Id && (
+  <Box display={collapsedRowId === record.Id ? "table-row-group" : "none"}>
+    <Tr>
+      <Td colSpan="4">
+        <Flex direction="column" mt={2} mb={2}>
+          <Box>
+            <strong>Mobile :</strong> <a href="tel:{record.ProspectMobilePhone__c}" style={{ color: "blue" }}>{record.ProspectMobilePhone__c}</a>
+          </Box>
+          <Box>
+            <strong>Offre :</strong> {record.OfferName__c}
+          </Box>
+          <Box>
+            <strong>Famille de l'offre :</strong> {record.FamilyOffer__c}
+          </Box>
+          <Box>
+            <strong>Date de signature :</strong> {formatDate(record.SignatureDate__c)}
+          </Box>
+          <Box>
+            <strong>Date de validation :</strong> {formatDate(record.ValidationDate__c)}
+          </Box>
+          <Box>
+            <strong>Type de vente :</strong> {record.CustomerType__c}
+          </Box>
+          <Box>
+            <strong>Numéro de commande :</strong> {record.OrderNumber__c}
+          </Box>
+          <Box>
+            <strong>Numéro de panier :</strong> {record.BasketNumber__c}
+          </Box>
+          <Box>
+            <strong>Commentaire du call :</strong> {record.Comment__c}
+          </Box>
+        </Flex>
+      </Td>
+    </Tr>
+  </Box>
+)}
+
+
+
+    </React.Fragment>
+  ))}
+</Tbody>
+
+    </Table>
+  
+    <Box>
+      <ReactPaginate
+        previousLabel={"←"}
+        nextLabel={"→"}
+        pageCount={pageCount}
+        onPageChange={handlePageClick}
+        containerClassName={"pagination"}
+        previousLinkClassName={"pagination__link"}
+        nextLinkClassName={"pagination__link"}
+        disabledClassName={"pagination__link--disabled"}
+        activeClassName={"pagination__link--active"}
+      />
       
-          <Tbody>
-            {sortedRecords.slice(offset, offset + PER_PAGE).map((record) => (
-              <Tr key={record.Id}>
-                <Td>{record.CreatedDate}</Td>
-                <Td>{record.TchProspectName__c}</Td>
-                <Td>{record.TchAddress__c}</Td>
-                <Td>{record.ProspectMobilePhone__c}</Td>
-                <Td>{record.ConnectionStatus__c}</Td>
-                <Td>{record.ConnectingDatePlanned__c}</Td>
-                <Td>{record.Status__c}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      
-        <Box>
-          <ReactPaginate
-            previousLabel={"←"}
-            nextLabel={"→"}
-            pageCount={pageCount}
-            onPageChange={handlePageClick}
-            containerClassName={"pagination"}
-            previousLinkClassName={"pagination__link"}
-            nextLinkClassName={"pagination__link"}
-            disabledClassName={"pagination__link--disabled"}
-            activeClassName={"pagination__link--active"}
-          />
-          
-        </Box>
-        {isLoading && <Loader />}
-      </Box>
+    </Box>
+    {isLoading && <Loader />}
+  </Box>
 );
 };
 
-export default Tableau;      
+export default Tableau;
+
