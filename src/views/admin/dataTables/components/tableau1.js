@@ -118,7 +118,7 @@ const Tableau = () => {
             return diffDays <= 7;
           });
           break;
-
+    
         case "Mois":
           filtered = records.filter((record) => {
             const recordDate = new Date(record.CreatedDate);
@@ -126,7 +126,7 @@ const Tableau = () => {
             return diffDays <= 30;
           });
           break;
-
+    
         case "Année":
           filtered = records.filter((record) => {
             const recordDate = new Date(record.CreatedDate);
@@ -134,175 +134,175 @@ const Tableau = () => {
             return diffDays <= 365;
           });
           break;
-
+    
         default:
           break;
       }
     }
-
+    
     setFilteredRecords(filtered);
     setFilter(filter);
+
   };
 
   useEffect(() => {
-    fetchData();
+  fetchData();
   }, [user]);
-
+  
   function handlePageClick({ selected: selectedPage }) {
-    setCurrentPage(selectedPage);
+  setCurrentPage(selectedPage);
   }
-
+  
   const offset = currentPage * PER_PAGE;
-
+  
   const pageCount = Math.ceil(filteredRecords.length / PER_PAGE);
-
+  
   const sortedRecords = sortRecords(filteredRecords).map((record) => ({
-    ...record,
-    CreatedDate: formatDate(record.CreatedDate),
-    ConnectingDatePlanned__c: formatDate(record.ConnectingDate__c),
+  ...record,
+  CreatedDate: formatDate(record.CreatedDate),
+  ConnectingDatePlanned__c: formatDate(record.ConnectingDate__c),
   }));
-
+  
   return (
-    <Box
-      w={{ base: "100%", md: "100%" }}
-      mx="auto"
-      className="table-container"
-      style={{
-        backgroundColor: colorMode === "light" ? "white" : "gray.700",
-        borderRadius: "5px",
-        boxShadow: "0 0 5px 1px rgba(0, 0, 0, 0.1)",
-        padding: "10px",
-        overflow: "auto",
-        maxHeight: "600px",
-        maxWidth: "100%",
-        minHeight: "300px",
-        minWidth: "300px",
-      }}
-    >
-      <StatusPieChart data={filteredRecords} />
+  <Box
+  w={{ base: "100%", md: "100%" }}
+  mx="auto"
+  className="table-container"
+  style={{
+  backgroundColor: colorMode === "light" ? "white" : "gray.700",
+  borderRadius: "5px",
+  boxShadow: "0 0 5px 1px rgba(0, 0, 0, 0.1)",
+  padding: "10px",
+  overflow: "auto",
+  maxHeight: "600px",
+  maxWidth: "100%",
+  minHeight: "300px",
+  minWidth: "300px",
+  }}
+  >
+  <StatusPieChart data={filteredRecords} />
 
-      <div style={{ marginTop: "60px" }}></div>
+  <div style={{ marginTop: "60px" }}></div>
 
-      <ButtonGroup isAttached mt={4} mb={4}>
-        <Button
-          colorScheme={filter === "Tous" ? "blue" : "gray"}
-          onClick={() => handleFilter("Tous")}
-        >
-          Tous
-        </Button>
-        <Button
-          colorScheme={filter === "Semaine" ? "blue" : "gray"}
-          onClick={() => handleFilter("Semaine")}
-        >
-          Semaine
-        </Button>
-        <Button
-          colorScheme={filter === "Mois" ? "blue" : "gray"}
-          onClick={() => handleFilter("Mois")}
-        >
-          Mois
-        </Button>
-        <Button
-          colorScheme={filter === "Année" ? "blue" : "gray"}
-          onClick={() => handleFilter("Année")}
-        >
-          Année
-        </Button>
-      </ButtonGroup>
+<ButtonGroup isAttached mt={4} mb={4}>
+  <Button
+    colorScheme={filter === "Tous" ? "blue" : "gray"}
+    onClick={() => handleFilter("Tous")}
+  >
+    Tous
+  </Button>
+  <Button
+    colorScheme={filter === "Semaine" ? "blue" : "gray"}
+    onClick={() => handleFilter("Semaine")}
+  >
+    Semaine
+  </Button>
+  <Button
+    colorScheme={filter === "Mois" ? "blue" : "gray"}
+    onClick={() => handleFilter("Mois")}
+  >
+    Mois
+  </Button>
+  <Button
+    colorScheme={filter === "Année" ? "blue" : "gray"}
+    onClick={() => handleFilter("Année")}
+  >
+    Année
+  </Button>
+</ButtonGroup>
 
-      <Table variant="simple">
-        <Thead>
+<Table variant="simple">
+  <Thead>
+    <Tr>
+      <Th>Détails</Th>
+      <Th
+        onClick={() => toggleSortDirection("CreatedDate")}
+        style={{ cursor: "pointer" }}
+      >
+        Date de la vente
+      </Th>
+      <Th>Nom</Th>
+      <Th>Adresse</Th>
+    </Tr>
+  </Thead>
+
+  <Tbody>
+    {sortedRecords
+      .slice(offset, offset + PER_PAGE)        .map((record, index) => (
+        <React.Fragment key={record.Id}>
           <Tr>
-            <Th>Détails</Th>
-            <Th
-              onClick={() => toggleSortDirection("CreatedDate")}
+            <Td
+              onClick={() => handleCollapseToggle(record.Id)}
               style={{ cursor: "pointer" }}
             >
-              Date de la vente
-            </Th>
-            <Th>Nom</Th>
-            <Th>Adresse</Th>
+              {record.TchPhone__c} <FaAngleDown />
+            </Td>
+            <Td>{record.CreatedDate}</Td>
+            <Td>{record.TchProspectName__c}</Td>
+            <Td>{record.TchAddress__c}</Td>
           </Tr>
-        </Thead>
-
-        <Tbody>
-          {sortedRecords
-            .slice(offset, offset + PER_PAGE)
-            .map((record, index) => (
-              <React.Fragment key={record.Id}>
-                <Tr>
-                  <Td
-                    onClick={() => handleCollapseToggle(record.Id)}
-                    style={{ cursor: "pointer" }}
+          <Collapse in={collapsedRowId === record.Id}>
+            <Box>
+              <VStack align="start" mt={2} mb={2}>
+                <Text>
+                  <strong>Mobile :</strong>{" "}
+                  <a
+                    href="tel:{record.ProspectMobilePhone__c}"
+                    style={{ color: "blue" }}
                   >
-                    {record.TchPhone__c} <FaAngleDown />
-                  </Td>
-                  <Td>{record.CreatedDate}</Td>
-                  <Td>{record.TchProspectName__c}</Td>
-                  <Td>{record.TchAddress__c}</Td>
-                </Tr>
-                <Collapse in={collapsedRowId === record.Id}>
-                  <Box>
-                    <VStack align="start" mt={2} mb={2}>
-                      <Text>
-                        <strong>Mobile :</strong>{" "}
-                        <a
-                          href="tel:{record.ProspectMobilePhone__c}"
-                          style={{ color: "blue" }}
-                        >
-                          {record.ProspectMobilePhone__c}
-                        </a>
-                      </Text>
-                      <Text>
-                        <strong>Offre :</strong> {record.OfferName__c}
-                      </Text>
-                      <Text>
-                        <strong>Famille de l'offre :</strong>{" "}
-                        {record.FamilyOffer__c}
-                      </Text>
-                      <Text>
-                        <strong>Date de signature :</strong>{" "}
-                        {formatDate(record.SignatureDate__c)}
-                      </Text>
-                      <Text>
-                        <strong>Date de validation :</strong>{" "}
-                        {formatDate(record.ValidationDate__c)}
-                      </Text>
-                      <Text>
-                        <strong>Type de vente :</strong>{" "}
-                        {record.CustomerType__c}
-                      </Text>
-                      <Text>
-                        <strong>Numéro de commande :</strong>{" "}
-                        {record.OrderNumber__c}
-                      </Text>
-                      <Text>
-                        <strong>Numéro de panier :</strong>{" "}
-                        {record.BasketNumber__c}
-                      </Text>
-                      <Text>
-                        <strong>Commentaire du call :</strong>{" "}
-                        {record.Comment__c}
-                      </Text>
-                    </VStack>
-                  </Box>
-                </Collapse>
-              </React.Fragment>
-            ))}
-        </Tbody>
-      </Table>
-      <ReactPaginate
-        previousLabel={"←"}
-        nextLabel={"→"}
-        pageCount={pageCount}
-        onPageChange={handlePageClick}
-        containerClassName={"pagination"}
-        previousLinkClassName={"pagination__link"}
-        nextLinkClassName={"pagination__link"}
-        disabledClassName={"pagination__link--disabled"}
-        activeClassName={"pagination__link--active"}
-      />
-    </Box>
-  );
+                    {record.ProspectMobilePhone__c}
+                  </a>
+                </Text>
+                <Text>
+                  <strong>Offre :</strong> {record.OfferName__c}
+                </Text>
+                <Text>
+                  <strong>Famille de l'offre :</strong>{" "}
+                  {record.FamilyOffer__c}
+                </Text>
+                <Text>
+                  <strong>Date de signature :</strong>{" "}
+                  {formatDate(record.SignatureDate__c)}
+                </Text>
+                <Text>
+                  <strong>Date de validation :</strong>{" "}
+                  {formatDate(record.ValidationDate__c)}
+                </Text>
+                <Text>
+                  <strong>Type de vente :</strong>{" "}
+                  {record.CustomerType__c}
+                </Text>
+                <Text>
+                  <strong>Numéro de commande :</strong>{" "}
+                  {record.OrderNumber__c}
+                </Text>
+                <Text>
+                  <strong>Numéro de panier :</strong>{" "}
+                  {record.BasketNumber__c}
+                </Text>
+                <Text>
+                  <strong>Commentaire du call :</strong>{" "}
+                  {record.Comment__c}
+                </Text>
+              </VStack>
+            </Box>
+          </Collapse>
+        </React.Fragment>
+      ))}
+  </Tbody>
+</Table>
+<ReactPaginate
+  previousLabel={"←"}
+  nextLabel={"→"}
+  pageCount={pageCount}
+  onPageChange={handlePageClick}
+  containerClassName={"pagination"}
+  previousLinkClassName={"pagination__link"}
+  nextLinkClassName={"pagination__link"}
+  disabledClassName={"pagination__link--disabled"}
+  activeClassName={"pagination__link--active"}
+/>
+</Box>
+);
 };
 export default Tableau;
