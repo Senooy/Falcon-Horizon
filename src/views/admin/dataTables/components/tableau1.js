@@ -166,13 +166,15 @@ const Tableau = () => {
   const getRowColor = (status) => {
   switch (status) {
     case "ToConfirm":
-      return "rgba(0, 0, 255, 0.1)"; // Bleu transparent
+      return "rgba(0, 108, 254, 0.03)"; // Bleu transparent
     case "Validated":
-      return "rgba(0, 128, 0, 0.1)"; // Vert transparent
+      return "rgba(3, 255, 0, 0.3)"; // Vert transparent
     case "Progress":
-      return "rgba(255, 165, 0, 0.1)"; // Orange transparent
+      return "rgba(3, 255, 0, 0.1)"; // Orange transparent
     case "Error":
-      return "rgba(255, 0, 0, 0.1)"; // Rouge transparent
+      return "rgba(255, 0, 0, 0.3)"; // Rouge transparent
+    case "Payed":
+      return "rgba(8, 254, 0, 0.91)"; // Rouge transparent
     default:
       return "";
   }
