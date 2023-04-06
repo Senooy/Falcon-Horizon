@@ -162,6 +162,22 @@ const Tableau = () => {
   CreatedDate: formatDate(record.CreatedDate),
   ConnectingDatePlanned__c: formatDate(record.ConnectingDate__c),
   }));
+
+  const getRowColor = (status) => {
+  switch (status) {
+    case "ToConfirm":
+      return "rgba(0, 0, 255, 0.1)"; // Bleu transparent
+    case "Validated":
+      return "rgba(0, 128, 0, 0.1)"; // Vert transparent
+    case "Progress":
+      return "rgba(255, 165, 0, 0.1)"; // Orange transparent
+    case "Error":
+      return "rgba(255, 0, 0, 0.1)"; // Rouge transparent
+    default:
+      return "";
+  }
+};
+
   
   return (
   <Box
@@ -231,7 +247,8 @@ const Tableau = () => {
     {sortedRecords
       .slice(offset, offset + PER_PAGE)        .map((record, index) => (
         <React.Fragment key={record.Id}>
-          <Tr>
+          <Tr style={{ backgroundColor: getRowColor(record.Status__c) }}>
+
             <Td
               onClick={() => handleCollapseToggle(record.Id)}
               style={{ cursor: "pointer" }}
