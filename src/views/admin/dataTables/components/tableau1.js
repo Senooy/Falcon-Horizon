@@ -223,6 +223,7 @@ const Tableau = () => {
       </Th>
       <Th>Nom</Th>
       <Th>Adresse</Th>
+      <Th>Statut</Th>
     </Tr>
   </Thead>
 
@@ -240,6 +241,8 @@ const Tableau = () => {
             <Td>{record.CreatedDate}</Td>
             <Td>{record.TchProspectName__c}</Td>
             <Td>{record.TchAddress__c}</Td>
+            <Td>{record.Status__c}</Td>
+
           </Tr>
           <Collapse in={collapsedRowId === record.Id}>
             <Box>
