@@ -160,7 +160,7 @@ const Tableau = () => {
   const sortedRecords = sortRecords(filteredRecords).map((record) => ({
   ...record,
   CreatedDate: formatDate(record.CreatedDate),
-  ConnectingDatePlanned__c: formatDate(record.ConnectingDate__c),
+  ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
   }));
 
   const getRowColor = (status) => {
@@ -194,7 +194,7 @@ const Tableau = () => {
   overflow: "auto",
   maxHeight: "600px",
   maxWidth: "100%",
-  minHeight: "300px",
+  minHeight: "700px",
   minWidth: "300px",
   }}
   >
@@ -240,7 +240,7 @@ const Tableau = () => {
         Date de la vente
       </Th>
       <Th>Nom</Th>
-      <Th>Adresse</Th>
+      <Th>Date de raccordement</Th>
       <Th>Statut</Th>
     </Tr>
   </Thead>
@@ -259,7 +259,7 @@ const Tableau = () => {
             </Td>
             <Td>{record.CreatedDate}</Td>
             <Td>{record.TchProspectName__c}</Td>
-            <Td>{record.TchAddress__c}</Td>
+            <Td>{record.ConnectingDatePlanned__c}</Td>
             <Td>{record.Status__c}</Td>
 
           </Tr>

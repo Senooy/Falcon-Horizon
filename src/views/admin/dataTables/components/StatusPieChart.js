@@ -10,7 +10,7 @@ import {
 import { Box, Flex, Text, Select } from '@chakra-ui/react';
 
 const StatusPieChart = ({ data }) => {
-  const COLORS = ['#fe1900', '#e3a217', '#1757e3', '#63cc0e', '#8B0000'];
+  const COLORS = ['#fe1900', '#43fe36', '#1757e3', '#b5c6e0', '#87ea79'];
 
   const [periode, setPeriode] = useState('jour');
 
