@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   PieChart,
   Pie,
@@ -7,7 +7,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { Box, Flex, Text, Select } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 
 const StatusPieChart = ({ data }) => {
   const statusColors = {
@@ -17,8 +17,6 @@ const StatusPieChart = ({ data }) => {
     'Validated': '#87ea79',
     'Error': '#fe1900',
   };
-
-  const [periode, setPeriode] = useState('jour');
 
   const chartData = data
     .reduce((acc, record) => {
@@ -37,10 +35,6 @@ const StatusPieChart = ({ data }) => {
   const tooltipFormatter = (value, name, props) => {
     const pourcentage = ((props.payload.value / total) * 100).toFixed(2);
     return `${pourcentage}%`;
-  };
-
-  const handlePeriodeChange = (event) => {
-    setPeriode(event.target.value);
   };
 
   return (

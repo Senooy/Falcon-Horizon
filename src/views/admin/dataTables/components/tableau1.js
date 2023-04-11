@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Box,
-  Flex,
   useColorMode,
   Table,
   Thead,
@@ -19,7 +18,6 @@ import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
 import ReactPaginate from "react-paginate";
 import "./pagination.css";
-import Loader from "components/loader";
 import StatusPieChart from "./StatusPieChart";
 import { FaAngleDown } from "react-icons/fa";
 
@@ -41,17 +39,14 @@ const Tableau = () => {
 
   const fetchData = async () => {
     try {
-      setIsLoading(true);
       const { data } = await axios.get(
         "http://app.falconmarketing.fr:3001/api/salesforce_data?salesCode=" +
           `${user.profileData.salesCode}`
       );
-      setIsLoading(false);
       setRecords(data.records);
       setFilteredRecords(data.records);
     } catch (error) {
       console.log(error);
-      setIsLoading(false);
     }
   };
 
