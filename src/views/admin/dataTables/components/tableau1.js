@@ -37,6 +37,10 @@ const Tableau = () => {
   });
   const [collapsedRowId, setCollapsedRowId] = useState(null);
   const [filter, setFilter] = useState("Tous");
+  const getRowColor = (status) => {
+    const colors = getRowColors(status);
+    return colorMode === "light" ? colors.light : colors.dark;
+  };
 
   const fetchData = async () => {
     try {
@@ -159,7 +163,9 @@ const Tableau = () => {
   ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
   }));
 
-  const getRowColor = (status) => {
+  const bgColor = useColorModeValue("white", "gray.700");
+
+  const getRowColors = (status) => {
     const lightColors = {
       ToConfirm: "rgba(0, 108, 254, 0.03)",
       Validated: "rgba(3, 255, 0, 0.3)",
@@ -167,7 +173,7 @@ const Tableau = () => {
       Error: "rgba(255, 0, 0, 0.3)",
       Payed: "rgba(8, 254, 0, 0.91)",
     };
-
+  
     const darkColors = {
       ToConfirm: "rgba(0, 108, 254, 0.1)",
       Validated: "rgba(3, 255, 0, 0.4)",
@@ -175,29 +181,27 @@ const Tableau = () => {
       Error: "rgba(255, 0, 0, 0.4)",
       Payed: "rgba(8, 254, 0, 0.91)",
     };
-
-    const colors = colorMode === "light" ? lightColors : darkColors;
-  return colors[status] || "";
-};
+  
+    return {
+      light: lightColors[status] || "",
+      dark: darkColors[status] || "",
+    };
+  };
+  
 
   
   return (
-  <Box
-  w={{ base: "100%", md: "100%" }}
-  mx="auto"
-  className="table-container"
-  style={{
-  backgroundColor: colorMode === "light" ? "white" : "gray.700",
-  borderRadius: "5px",
-  boxShadow: "0 0 5px 1px rgba(0, 0, 0, 0.1)",
-  padding: "10px",
-  overflow: "auto",
-  maxHeight: "600px",
-  maxWidth: "100%",
-  minHeight: "1000px",
-  minWidth: "300px",
-  }}
-  >
+    <Box
+      bg={bgColor}
+      borderRadius="5px"
+      boxShadow="0 0 5px 1px rgba(0, 0, 0, 0.1)"
+      p="10px"
+      overflow="auto"
+      maxH="600px"
+      maxW="100%"
+      minH="1000px"
+      minW="300px"
+    >
   <StatusPieChart data={filteredRecords} />
 
   <div style={{ marginTop: "60px" }}></div>
