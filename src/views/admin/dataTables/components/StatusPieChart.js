@@ -10,22 +10,27 @@ import {
 import { Box, Flex, Text, Select } from '@chakra-ui/react';
 
 const StatusPieChart = ({ data }) => {
-  const COLORS = ['#fe1900', '#43fe36', '#1757e3', '#b5c6e0', '#87ea79'];
+  const statusColors = {
+    'ToConfirm': '#b5c6e0',
+    'Progress': '#1757e3',
+    'Payed': '#43fe36',
+    'Validated': '#87ea79',
+    'Error': '#fe1900',
+  };
 
   const [periode, setPeriode] = useState('jour');
 
   const chartData = data
-  .reduce((acc, record) => {
-    const statusIndex = acc.findIndex((item) => item.name === record.Status__c);
-    if (statusIndex !== -1) {
-      acc[statusIndex].value += 1;
-    } else {
-      acc.push({ name: record.Status__c, value: 1 });
-    }
-    return acc;
-  }, [])
-  .sort((a, b) => a.name.localeCompare(b.name));
-
+    .reduce((acc, record) => {
+      const statusIndex = acc.findIndex((item) => item.name === record.Status__c);
+      if (statusIndex !== -1) {
+        acc[statusIndex].value += 1;
+      } else {
+        acc.push({ name: record.Status__c, value: 1 });
+      }
+      return acc;
+    }, [])
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const total = chartData.reduce((acc, item) => acc + item.value, 0);
 
@@ -52,7 +57,7 @@ const StatusPieChart = ({ data }) => {
             fill="#8884d8"
           >
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell key={`cell-${index}`} fill={statusColors[entry.name]} />
             ))}
           </Pie>
           <Tooltip formatter={tooltipFormatter} />
