@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   useColorMode,
+  useColorModeValue,
   Table,
   Thead,
   Tbody,
@@ -159,20 +160,24 @@ const Tableau = () => {
   }));
 
   const getRowColor = (status) => {
-  switch (status) {
-    case "ToConfirm":
-      return "rgba(0, 108, 254, 0.03)"; // Bleu transparent
-    case "Validated":
-      return "rgba(3, 255, 0, 0.3)"; // Vert transparent
-    case "Progress":
-      return "rgba(3, 255, 0, 0.1)"; // Orange transparent
-    case "Error":
-      return "rgba(255, 0, 0, 0.3)"; // Rouge transparent
-    case "Payed":
-      return "rgba(8, 254, 0, 0.91)"; // Rouge transparent
-    default:
-      return "";
-  }
+    const lightColors = {
+      ToConfirm: "rgba(0, 108, 254, 0.03)",
+      Validated: "rgba(3, 255, 0, 0.3)",
+      Progress: "rgba(3, 255, 0, 0.1)",
+      Error: "rgba(255, 0, 0, 0.3)",
+      Payed: "rgba(8, 254, 0, 0.91)",
+    };
+
+    const darkColors = {
+      ToConfirm: "rgba(0, 108, 254, 0.1)",
+      Validated: "rgba(3, 255, 0, 0.4)",
+      Progress: "rgba(3, 255, 0, 0.2)",
+      Error: "rgba(255, 0, 0, 0.4)",
+      Payed: "rgba(8, 254, 0, 0.91)",
+    };
+
+    const colors = colorMode === "light" ? lightColors : darkColors;
+  return colors[status] || "";
 };
 
   
@@ -189,7 +194,7 @@ const Tableau = () => {
   overflow: "auto",
   maxHeight: "600px",
   maxWidth: "100%",
-  minHeight: "700px",
+  minHeight: "1000px",
   minWidth: "300px",
   }}
   >
@@ -244,7 +249,8 @@ const Tableau = () => {
     {sortedRecords
       .slice(offset, offset + PER_PAGE)        .map((record, index) => (
         <React.Fragment key={record.Id}>
-          <Tr style={{ backgroundColor: getRowColor(record.Status__c) }}>
+          <Tr bg={getRowColor(record.Status__c)}>
+
 
             <Td
               onClick={() => handleCollapseToggle(record.Id)}
