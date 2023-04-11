@@ -23,28 +23,14 @@ app.get("/api/salesforce_data", async (req, res) => {
       },
     });
 
-    const fetchSalesData = async (salesCode) => {
-      const salesDataUrl = `https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/${salesCode}/Sales__r`;
-      const { data: salesData } = await axios.get(salesDataUrl, {
-        headers: {
-          Authorization: `Bearer ${data.access_token}`,
-        },
-      });
-      return salesData;
-    };
+    const salesDataUrl = `https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/${req.query.salesCode}/Sales__r`;
+    const { data: salesData } = await axios.get(salesDataUrl, {
+      headers: {
+        Authorization: `Bearer ${data.access_token}`,
+      },
+    });
 
-    let salesCodes = req.query.salesCode;
-    if (!Array.isArray(salesCodes)) {
-      salesCodes = [salesCodes];
-    }
-
-    const allSalesData = [];
-    for (const salesCode of salesCodes) {
-      const salesData = await fetchSalesData(salesCode);
-      allSalesData.push(...salesData);
-    }
-
-    res.json(allSalesData);
+    res.json(salesData);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Une erreur est survenue lors de la récupération des données." });
