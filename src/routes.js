@@ -11,6 +11,7 @@ import {
 
 // Admin Imports
 import MainDashboard from 'views/admin/default';
+import Statistiques from 'views/admin/statistiques';
 
 // Auth Imports
 import SignInCentered from 'views/auth/signIn';
@@ -23,6 +24,13 @@ const routes = [
     path: '/default',
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     component: MainDashboard,
+  },
+  {
+    name: 'Statistiques',
+    layout: '/admin',
+    path: '/statistiques',
+    icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
+    component: Statistiques,
   },
   {
     name: 'Sign In',

@@ -272,6 +272,9 @@ const Tableau = () => {
             <Box>
               <VStack align="start" mt={2} mb={2}>
                 <Text>
+                  <strong>Adresse :</strong> {record.TchAddress__c}
+                </Text>
+                <Text>
                   <strong>Mobile :</strong>{" "}
                   <a
                     href="tel:{record.ProspectMobilePhone__c}"
@@ -279,6 +282,9 @@ const Tableau = () => {
                   >
                     {record.ProspectMobilePhone__c}
                   </a>
+                </Text>
+                <Text>
+                  <strong>Statut du raccordement :</strong>{record.ConnectionStatus__c}
                 </Text>
                 <Text>
                   <strong>Offre :</strong> {record.OfferName__c}
