@@ -14,6 +14,7 @@ import {
   Text,
   ButtonGroup,
   Button,
+  Flex,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
@@ -21,10 +22,12 @@ import ReactPaginate from "react-paginate";
 import "./pagination.css";
 import StatusPieChart from "./StatusPieChart";
 import { FaAngleDown } from "react-icons/fa";
+import { column } from "stylis";
 
 const PER_PAGE = 10;
 
 const Tableau = () => {
+  const periods = ["Semaine", "Mois", "Année"];
   const { colorMode } = useColorMode();
   const { user } = React.useContext(AuthContext);
   const [records, setRecords] = useState([]);
@@ -36,11 +39,12 @@ const Tableau = () => {
     ascending: false,
   });
   const [collapsedRowId, setCollapsedRowId] = useState(null);
-  const [filter, setFilter] = useState("Tous");
+  const [filter, setFilter] = useState({ period: "Tous", status: "Tous" });
   const getRowColor = (status) => {
     const colors = getRowColors(status);
     return colorMode === "light" ? colors.light : colors.dark;
   };
+  
 
   const fetchData = async () => {
     try {
@@ -101,49 +105,44 @@ const Tableau = () => {
     }
   };
 
-  const handleFilter = (filter) => {
+  const statuses = ["ToConfirm", "Validated", "Progress", "Error", "Payed"];
+
+
+  const filterRecords = (period, status) => {
     const now = new Date();
-    let filtered = [];
-
-    if (filter === "Tous") {
-      filtered = records;
-    } else {
-      const oneDay = 24 * 60 * 60 * 1000;
-
-      switch (filter) {
+    const oneDay = 24 * 60 * 60 * 1000;
+  
+    const filteredByPeriod = records.filter((record) => {
+      const recordDate = new Date(record.CreatedDate);
+      const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
+  
+      switch (period) {
         case "Semaine":
-          filtered = records.filter((record) => {
-            const recordDate = new Date(record.CreatedDate);
-            const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
-            return diffDays <= 7;
-          });
-          break;
-    
+          return diffDays <= 7;
         case "Mois":
-          filtered = records.filter((record) => {
-            const recordDate = new Date(record.CreatedDate);
-            const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
-            return diffDays <= 30;
-          });
-          break;
-    
+          return diffDays <= 30;
         case "Année":
-          filtered = records.filter((record) => {
-            const recordDate = new Date(record.CreatedDate);
-            const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
-            return diffDays <= 365;
-          });
-          break;
-    
+          return diffDays <= 365;
         default:
-          break;
+          return true;
       }
-    }
-    
-    setFilteredRecords(filtered);
-    setFilter(filter);
+    });
+  
+    const filteredByStatus = status === "Tous"
+  ? filteredByPeriod
+  : filteredByPeriod.filter((record) => record.Status__c === status);
 
+    return filteredByStatus;
   };
+
+
+  const handleFilter = (period, status) => {
+    const filtered = filterRecords(period, status);
+    setFilteredRecords(filtered);
+    setFilter({ period, status });
+  };
+  
+  
 
   useEffect(() => {
   fetchData();
@@ -202,38 +201,64 @@ const Tableau = () => {
       minH="1000px"
       minW="300px"
     >
-  <StatusPieChart data={filteredRecords} />
+      <StatusPieChart data={filteredRecords} />
 
-  <div style={{ marginTop: "60px" }}></div>
+      <div style={{ marginTop: "60px" }}></div>
+      <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
+  <Box mb={4}>
+    <ButtonGroup isAttached>
+      <Button
+        colorScheme={filter.period === "Tous" ? "blue" : "gray"}
+        onClick={() => handleFilter("Tous", filter.status)}
+        px={10}
+      >
+        Tous
+      </Button>
+      {periods.map((period) => (
+        <Button
+          key={period}
+          colorScheme={filter.period === period ? "blue" : "gray"}
+          onClick={() => handleFilter(period, filter.status)}
+        >
+          {period}
+        </Button>
+      ))}
+    </ButtonGroup>
+  </Box>
 
-<ButtonGroup isAttached mt={4} mb={4}>
-  <Button
-    colorScheme={filter === "Tous" ? "blue" : "gray"}
-    onClick={() => handleFilter("Tous")}
+  <Box mb={4}>
+  <ButtonGroup
+    isAttached
+    spacing={20}
+    width={{ base: "100%", md: "auto" }}
+    mb={4}
+    
   >
-    Tous
-  </Button>
-  <Button
-    colorScheme={filter === "Semaine" ? "blue" : "gray"}
-    onClick={() => handleFilter("Semaine")}
-  >
-    Semaine
-  </Button>
-  <Button
-    colorScheme={filter === "Mois" ? "blue" : "gray"}
-    onClick={() => handleFilter("Mois")}
-  >
-    Mois
-  </Button>
-  <Button
-    colorScheme={filter === "Année" ? "blue" : "gray"}
-    onClick={() => handleFilter("Année")}
-  >
-    Année
-  </Button>
-</ButtonGroup>
+    <Button
+      colorScheme={filter.status === "Tous" ? "blue" : "gray"}
+      onClick={() => handleFilter(filter.period, "Tous")}
+      px={10}
+    >
+      Tous
+    </Button>
+    {statuses.map((status) => (
+      <Button
+        key={status}
+        colorScheme={filter.status === status ? "blue" : "gray"}
+        onClick={() => handleFilter(filter.period, status)}
+        px={10}
+      >
+        {status}
+      </Button>
+    ))}
+  </ButtonGroup>
+</Box>
+</Flex>
 
-<Table variant="simple">
+
+  
+<Table variant="simple"
+overflow={{ base: "auto", md: "auto" }}>
   <Thead>
     <Tr>
       <Th>Détails</Th>
@@ -254,8 +279,6 @@ const Tableau = () => {
       .slice(offset, offset + PER_PAGE)        .map((record, index) => (
         <React.Fragment key={record.Id}>
           <Tr bg={getRowColor(record.Status__c)}>
-
-
             <Td
               onClick={() => handleCollapseToggle(record.Id)}
               style={{ cursor: "pointer" }}
