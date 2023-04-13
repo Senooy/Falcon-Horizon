@@ -23,6 +23,8 @@ import "./pagination.css";
 import StatusPieChart from "./StatusPieChart";
 import { FaAngleDown } from "react-icons/fa";
 import { column } from "stylis";
+import { MdBarChart } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 const PER_PAGE = 10;
 
@@ -201,13 +203,27 @@ const Tableau = () => {
       minH="1000px"
       minW="300px"
     >
-      <StatusPieChart data={filteredRecords} />
+  
 
       <div style={{ marginTop: "60px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
+      <Link to="/admin/statistiques">
+       <Button
+        leftIcon={<MdBarChart />}
+        colorScheme="blue"
+        variant="solid"
+        mb={4}
+       >
+      Statistiques
+      </Button>
+  </Link>
   <Box mb={4}>
+
+  
+
     <ButtonGroup isAttached>
       <Button
+        size="md"
         colorScheme={filter.period === "Tous" ? "blue" : "gray"}
         onClick={() => handleFilter("Tous", filter.status)}
         px={10}
@@ -217,6 +233,7 @@ const Tableau = () => {
       {periods.map((period) => (
         <Button
           key={period}
+          size="md"
           colorScheme={filter.period === period ? "blue" : "gray"}
           onClick={() => handleFilter(period, filter.status)}
         >
@@ -235,6 +252,7 @@ const Tableau = () => {
     
   >
     <Button
+      size="md"
       colorScheme={filter.status === "Tous" ? "blue" : "gray"}
       onClick={() => handleFilter(filter.period, "Tous")}
       px={10}
@@ -243,18 +261,18 @@ const Tableau = () => {
     </Button>
     {statuses.map((status) => (
       <Button
-        key={status}
-        colorScheme={filter.status === status ? "blue" : "gray"}
-        onClick={() => handleFilter(filter.period, status)}
-        px={10}
+      key={status}
+      size="md"
+      colorScheme={filter.status === status ? "blue" : "gray"}
+      onClick={() => handleFilter(filter.period, status)}
+      px={10}
       >
-        {status}
+      {status}
       </Button>
     ))}
   </ButtonGroup>
 </Box>
 </Flex>
-
 
   
 <Table variant="simple"
