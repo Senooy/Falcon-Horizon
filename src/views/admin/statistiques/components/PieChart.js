@@ -5,14 +5,15 @@ import {
   Button,
   Flex,
   Text,
+  useColorMode,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
 import RaccordementTable from './StatusPieChart';
-import { PieChart } from "recharts";
 
 const Tableau = () => {
   const { user } = React.useContext(AuthContext);
+  const { colorMode } = useColorMode();
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [filter, setFilter] = useState("Tous");
@@ -84,15 +85,27 @@ const Tableau = () => {
 
   const tauxRaccordement = calculateTauxRaccordement(filteredRecords);
 
-  return (
-    <Flex direction="column" alignItems="center"
-    bgColor="white"
-    borderRadius="20px"
-    
-    >
-      <Text fontSize="2xl" fontWeight="bold" mb={4} mt={10}> Taux de raccordement </Text>
+  const bgColor = { light: "white", dark: "gray.700" };
+  const textColor = { light: "black", dark: "white" };
 
-      <RaccordementTable data={filteredRecords} tauxRaccordement={tauxRaccordement} /> {/* Passer le taux de raccordement en prop */}
+  return (
+    <Flex
+      direction="column"
+      alignItems="center"
+      bgColor={bgColor[colorMode]}
+      borderRadius="20px"
+    >
+      <Text
+        fontSize="2xl"
+        fontWeight="bold"
+        mb={4}
+        mt={10}
+        color={textColor[colorMode]}
+      >
+        Taux de raccordement
+      </Text>
+
+      <RaccordementTable data={filteredRecords} tauxRaccordement={tauxRaccordement} />
       <ButtonGroup isAttached mt={10} mb={4}>
         <Button
           colorScheme={filter === "Tous" ? "blue" : "gray"}
