@@ -8,7 +8,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
-import RaccordementPieChart from './StatusPieChart';
+import RaccordementTable from './StatusPieChart';
 import { PieChart } from "recharts";
 
 const Tableau = () => {
@@ -40,13 +40,7 @@ const Tableau = () => {
       const oneDay = 24 * 60 * 60 * 1000;
 
       switch (filter) {
-        case "Semaine":
-          filtered = records.filter((record) => {
-            const recordDate = new Date(record.CreatedDate);
-            const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
-            return diffDays <= 7;
-          });
-          break;
+        
     
         case "Mois":
           filtered = records.filter((record) => {
@@ -98,7 +92,7 @@ const Tableau = () => {
     >
       <Text fontSize="2xl" fontWeight="bold" mb={4} mt={10}> Taux de raccordement </Text>
 
-      <RaccordementPieChart data={filteredRecords} tauxRaccordement={tauxRaccordement} /> {/* Passer le taux de raccordement en prop */}
+      <RaccordementTable data={filteredRecords} tauxRaccordement={tauxRaccordement} /> {/* Passer le taux de raccordement en prop */}
       <ButtonGroup isAttached mt={10} mb={4}>
         <Button
           colorScheme={filter === "Tous" ? "blue" : "gray"}
@@ -106,12 +100,7 @@ const Tableau = () => {
         >
           Tous
         </Button>
-        <Button
-          colorScheme={filter === "Semaine" ? "blue" : "gray"}
-          onClick={() => handleFilter("Semaine")}
-        >
-          Semaine
-        </Button>
+       
         <Button
           colorScheme={filter === "Mois" ? "blue" : "gray"}
           onClick={() => handleFilter("Mois")}

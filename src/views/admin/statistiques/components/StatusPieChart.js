@@ -1,88 +1,71 @@
-// RaccordementPieChart.js
-import React from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { Box, Flex, Text } from "@chakra-ui/react";
-import StatusPieChart from "views/admin/dataTables/components/StatusPieChart";
+import React, { useMemo } from "react";
+import { Box, Table, Thead, Tbody, Tr, Th, Td } from "@chakra-ui/react";
+import Chart from "react-apexcharts";
+import { calculateMonthlyData } from "./utils.js";
 
-const RaccordementPieChart = ({ data }) => {
-  const raccordementColors = {
-    Raccordé: "#43fe36",
-    "Non raccordé": "#fe1900",
+const RaccordementTable = ({ data }) => {
+  const raccordOK = data.filter((record) => record.ConnectionStatus__c === "RaccordOK").length;
+  const payedValidatedProgress = data.filter(
+    (record) =>
+      (record.Status__c === "Validated" ||
+        record.Status__c === "Payed" ||
+        record.Status__c === "Progress") ||
+        record.ConnectionStatus__c == "EnCours" &&
+      !record.OfferName__c.includes("Mobile")
+  ).length;
+  const tauxRaccordement = (raccordOK / payedValidatedProgress) * 100;
+
+  const monthlyData = useMemo(() => calculateMonthlyData(data), [data]);
+
+  const chartOptions = {
+    chart: {
+      id: "bar",
+      toolbar: {
+        show: false,
+      },
+    },
+    xaxis: {
+      categories: monthlyData.map((item) => item.month),
+    },
+    plotOptions: {
+      bar: {
+        columnWidth: "50%",
+      },
+    },
   };
 
-  const chartData = [
+  const chartSeries = [
     {
-      name: "Raccordé",
-      value: data.filter(
-        (record) =>
-          record.ConnectionStatus__c === "RaccordOK" &&
-          (record.Status__c === "Payed" || record.Status__c === "Validated")
-      ).length,
-    },
-    {
-      name: "Non raccordé",
-      value: data.filter(
-        (record) =>
-          record.ConnectionStatus__c !== "RaccordOK" &&
-          (record.Status__c === "Payed" || record.Status__c === "Validated")
-      ).length,
+      name: "RaccordOK",
+      data: monthlyData.map((item) => item.count),
     },
   ];
 
-  const total = chartData.reduce((acc, item) => acc + item.value, 0);
-
-  const tooltipFormatter = (value, name, props) => {
-    const pourcentage = ((props.payload.value / total) * 100).toFixed(2);
-    return `${pourcentage}%`;
-  };
-
   return (
-    <Box width="100%" height="400px">
-      <ResponsiveContainer>
-        <PieChart>
-          <Pie
-            data={chartData}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}
-            fill="#8884d8"
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={raccordementColors[entry.name]} />
-            ))}
-            <text
-              x="50%"
-              y="50%"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize="1.5rem"
-              fontWeight="bold"
-            >
-              {((chartData[0].value / total) * 100).toFixed(2)}%
-            </text>
-          </Pie>
-          <Tooltip formatter={tooltipFormatter} />
-          <Legend />
-        </PieChart>
-      </ResponsiveContainer>
-      <Flex justifyContent="center" mt={2}>
-        {chartData.map((item, index) => (
-          <Text key={index} fontSize="sm" mx={2}>
-            {`${item.name}: ${(item.value / total * 100).toFixed(2)}%`}
-          </Text>
-        ))}
-      </Flex>
+    <Box width="100%" mt={4}>
+      <Box width="100%" overflowX="auto">
+        <Table variant="simple" minWidth="500px">
+          <Thead>
+            <Tr>
+              <Th>RaccordOK</Th>
+              <Th>Contrats validés</Th>
+              <Th>Taux de raccordement</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            <Tr>
+              <Td>{raccordOK}</Td>
+              <Td>{payedValidatedProgress}</Td>
+              <Td>{tauxRaccordement.toFixed(2)}%</Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </Box>
+      <Box mt={8}>
+        <Chart options={chartOptions} series={chartSeries} type="bar" height={350} />
+      </Box>
     </Box>
   );
 };
 
-export default RaccordementPieChart;
+export default RaccordementTable;
