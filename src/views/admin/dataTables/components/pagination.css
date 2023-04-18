@@ -11,8 +11,8 @@
   .pagination a {
   padding: 8px;
   border-radius: 5px;
-  border: 1px solid #6c7ac9;
-  color: #6c7ac9;
+  border: 1px solid #1D3E5F;
+  color: #1D3E5F;
   font-size: 1rem;
   }
   
@@ -22,7 +22,7 @@
   
   .pagination__link--active a {
   color: #fff;
-  background: #6c7ac9;
+  background: #1D3E5F;
   }
   
   .pagination__link--disabled a {

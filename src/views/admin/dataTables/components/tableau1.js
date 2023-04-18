@@ -210,7 +210,7 @@ const Tableau = () => {
       <Link to="/admin/statistiques">
        <Button
         leftIcon={<MdBarChart />}
-        colorScheme="blue"
+        colorScheme="brand"
         variant="solid"
         mb={4}
        >
@@ -224,7 +224,7 @@ const Tableau = () => {
     <ButtonGroup isAttached>
       <Button
         size="md"
-        colorScheme={filter.period === "Tous" ? "blue" : "gray"}
+        colorScheme={filter.period === "Tous" ? "brand" : "gray"}
         onClick={() => handleFilter("Tous", filter.status)}
         px={10}
       >
@@ -234,7 +234,7 @@ const Tableau = () => {
         <Button
           key={period}
           size="md"
-          colorScheme={filter.period === period ? "blue" : "gray"}
+          colorScheme={filter.period === period ? "brand" : "gray"}
           onClick={() => handleFilter(period, filter.status)}
         >
           {period}
@@ -253,7 +253,7 @@ const Tableau = () => {
   >
     <Button
       size="md"
-      colorScheme={filter.status === "Tous" ? "blue" : "gray"}
+      colorScheme={filter.status === "Tous" ? "brand" : "gray"}
       onClick={() => handleFilter(filter.period, "Tous")}
       px={10}
     >
