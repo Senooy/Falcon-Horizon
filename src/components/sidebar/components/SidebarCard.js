@@ -18,14 +18,14 @@ export default function SidebarDocs() {
       justify='center'
       direction='column'
       align='center'
-      bg={bgColor}
+      bg='linear-gradient(135deg, #1D3E5F 0%, #1D3E5F 100%)'
       borderRadius='30px'
       me='20px'
       position='relative'>
       <Flex
         border='5px solid'
         borderColor={borderColor}
-        bg='linear-gradient(135deg, #868CFF 0%, #4318FF 100%)'
+        bg='linear-gradient(135deg, #1D3E5F 0%, #1D3E5F 100%)'
         borderRadius='50%'
         w='94px'
         h='94px'
@@ -36,7 +36,7 @@ export default function SidebarDocs() {
         left='50%'
         top='-47px'
         transform='translate(-50%, 0%)'>
-        <Image src={logoWhite} w='40px' h='40px' />
+        <Image src={logoWhite} w='60px' h='60px' />
       </Flex>
       <Flex
         direction='column'
@@ -61,7 +61,7 @@ export default function SidebarDocs() {
           px='10px'
           mb='14px'
           textAlign='center'>
-          N'oubliez pas la cooptation, jusqu'à 300 euros d'offerts !
+          Cooptation obligatoire : 300€ par recrutement
         </Text>
       </Flex>
       <Link href='https://docs.google.com/forms/d/e/1FAIpQLSd-5qONV_spBiHlFnwrH5xsd-roTkGkshJ97N5Vlp4DPYCanw/viewform?vc=0&c=0&w=1&flr=0'>
