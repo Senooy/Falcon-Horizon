@@ -3,6 +3,35 @@ const axios = require("axios");
 const qs = require("qs");
 const cors = require("cors");
 
+
+// Gestion uploads des fichiers 
+
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './uploads'); // Définir le répertoire de destination des fichiers
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}_${file.originalname}`); // Créer un nom de fichier unique
+  },
+});
+
+const upload = multer({ storage: storage });
+
+
+app.post('/upload', upload.array('files'), (req, res) => {
+  res.status(200).json({ message: 'Fichiers uploadés avec succès' });
+});
+
+const response = await axios.post('http://localhost:3001/upload', formData, {
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+});
+
+// API Salesforce
+
 const app = express();
 app.use(cors());
 

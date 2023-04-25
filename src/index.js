@@ -7,6 +7,7 @@ import AdminLayout from 'layouts/admin';
 import { ChakraProvider } from '@chakra-ui/react';
 import theme from 'theme/theme';
 import { ContextProvider } from 'contexts/AuthContext';
+import 'firebase/functions';
 
 ReactDOM.render(
   <ChakraProvider theme={theme}>

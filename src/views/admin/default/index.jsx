@@ -33,16 +33,20 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import Tableau from "../dataTables/components/tableau1";
+import DropzoneComponent from "../dataTables/components/dropzone";
 
 export default function UserReports() {
   // Chakra Color Mode
   const brandColor = useColorModeValue("brand.500", "white");
   const boxBg = useColorModeValue("secondaryGray.300", "whiteAlpha.100");
 
+  
+
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
       <SimpleGrid columns={{ base: 1, md: 1, xl: 1 }} gap="20px" mb="20px">
         <SimpleGrid columns={{ base: 1, md: 2, xl: 2 }} gap="20px"></SimpleGrid>
+       <DropzoneComponent></DropzoneComponent>
         <Tableau />
       </SimpleGrid>
       <SimpleGrid
