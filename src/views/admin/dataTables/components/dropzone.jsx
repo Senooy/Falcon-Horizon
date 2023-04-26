@@ -15,6 +15,8 @@ function DropzoneComponent() {
   });
 
   const handleUploadClick = async () => {
+    setUploadStatus(null);
+    setErrorMessage(null);
     try {
       const formData = new FormData();
   
