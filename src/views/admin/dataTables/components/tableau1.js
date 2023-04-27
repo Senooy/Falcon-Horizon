@@ -107,7 +107,15 @@ const Tableau = () => {
     }
   };
 
-  const statuses = ["ToConfirm", "Validated", "Progress", "Error", "Payed"];
+  const statuses = [
+    "ToConfirm",
+    "Validated",
+    "Progress",
+    "Error",
+    "Payed",
+    "EnCoursDeRattrapage", // Ajoutez le statut EnCoursDeRattrapage
+  ];
+
 
 
   const filterRecords = (period, status) => {
@@ -130,9 +138,10 @@ const Tableau = () => {
       }
     });
   
-    const filteredByStatus = status === "Tous"
-  ? filteredByPeriod
-  : filteredByPeriod.filter((record) => record.Status__c === status);
+    const filteredByStatus =
+    status === "Tous"
+      ? filteredByPeriod
+      : filteredByPeriod.filter((record) => record.Status__c === status || record.ConnectionStatus__c === status); // Modifiez cette ligne pour inclure le statut EnCoursDeRattrapage
 
     return filteredByStatus;
   };
@@ -244,34 +253,42 @@ const Tableau = () => {
   </Box>
 
   <Box mb={4}>
-  <ButtonGroup
-    isAttached
-    spacing={20}
-    width={{ base: "100%", md: "auto" }}
-    mb={4}
-    
-  >
-    <Button
-      size="md"
-      colorScheme={filter.status === "Tous" ? "brand" : "gray"}
-      onClick={() => handleFilter(filter.period, "Tous")}
-      px={10}
-    >
-      Tous
-    </Button>
-    {statuses.map((status) => (
-      <Button
-      key={status}
-      size="md"
-      colorScheme={filter.status === status ? "blue" : "gray"}
-      onClick={() => handleFilter(filter.period, status)}
-      px={10}
+      <ButtonGroup
+        isAttached
+        spacing={20}
+        width={{ base: "100%", md: "auto" }}
+        mb={4}
       >
-      {status}
-      </Button>
-    ))}
-  </ButtonGroup>
-</Box>
+        <Button
+          size="md"
+          colorScheme={filter.status === "Tous" ? "brand" : "gray"}
+          onClick={() => handleFilter(filter.period, "Tous")}
+          px={10}
+        >
+          Tous
+        </Button>
+        {statuses.map((status) => (
+          <Button
+            key={status}
+            size="md"
+            colorScheme={filter.status === status ? "blue" : "gray"}
+            onClick={() => handleFilter(filter.period, status)}
+            px={10}
+          >
+            {status}
+          </Button>
+        ))}
+        <Button // Ajoutez un nouveau bouton pour le statut EnCoursDeRattrapage
+          size="md"
+          colorScheme={filter.status === "EnCoursDeRattrapage" ? "blue" : "gray"}
+          onClick={() => handleFilter(filter.period, "EnCoursDeRattrapage")}
+          px={10}
+        >
+          EnCoursDeRattrapage
+        </Button>
+      </ButtonGroup>
+    </Box>
+
 </Flex>
 
   
