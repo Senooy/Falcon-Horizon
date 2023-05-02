@@ -33,7 +33,8 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import Tableau from "../dataTables/components/tableau1";
-import AdminDropzone from "../dataTables/components/admindropzone";
+
+
 export default function UserReports() {
   // Chakra Color Mode
   const brandColor = useColorModeValue("brand.500", "white");
