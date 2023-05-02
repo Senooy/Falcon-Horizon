@@ -3,6 +3,7 @@ const axios = require("axios");
 const qs = require("qs");
 const cors = require("cors");
 
+const userId = userCredential.user.uid;
 
 // API Salesforce
 const app = express();
@@ -32,6 +33,8 @@ app.post("/signin", async (req, res) => {
     console.log("Erreur lors de la connexion de l'utilisateur", error);
   }
 });
+
+console.log(`Utilisateur connecté avec l'ID: ${userId}`);
 
 
 const token_url = "https://login.salesforce.com/services/oauth2/token";
