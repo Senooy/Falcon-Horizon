@@ -1,46 +1,13 @@
 const express = require("express");
+const axios = require("axios");
+const qs = require("qs");
+const cors = require("cors");
+
+
+// API Salesforce
 const app = express();
-const firebase = require("firebase/app");
-require("firebase/auth");
-require("firebase/firestore");
-const { MongoClient } = require("mongodb");
+app.use(cors());
 
-
-app.use(express.json());
-
-const uri = "mongodb+srv://nskhelifi:JvMIw2tmGjHUrA4w@cluster0.k2t4xjh.mongodb.net/?retryWrites=true&w=majority";
-
-
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-
-async function run() {
-  try {
-    // Connectez le client au serveur (facultatif à partir de la version 4.7)
-    await client.connect();
-    // Envoi d'un ping pour confirmer une connexion réussie
-    console.log("Connecté à la base de données MongoDB");
-    const db = client.db("Cluster0");
-
-    app.get('/api/users/:id', async (req, res) => {
-  try {
-    const userId = req.params.id;
-    console.log('Utilisateur connecté avec l\'ID:', userId);
-
-    const userDoc = await db.collection('users').doc(userId).get();
-
-    if (!userDoc.exists) {
-      res.status(404).json({ message: 'Utilisateur introuvable' });
-    } else {
-      const userData = userDoc.data();
-      res.status(200).json(userData);
-    }
-  } catch (error) {
-    console.error('Erreur de récupération des données utilisateur', error);
-    res.status(500).json({ message: 'Erreur de récupération des données utilisateur' });
-  }
-});
-
-    
 app.post("/signin", async (req, res) => {
   const { email, password } = req.body;
 
@@ -53,60 +20,17 @@ app.post("/signin", async (req, res) => {
 
     if (doc.exists) {
       const userData = doc.data();
-      const insertedId = await insertUserIntoMongoDB(userData);
-      const insertedUser = await findUserInMongoDB(insertedId);
-      res.status(200).json({ message: `Utilisateur inséré avec succès avec l'ID : ${insertedId}`, user: insertedUser });
+      const isAdmin = userData.isAdmin;
+      res.status(200).json({ message: `Utilisateur connecté avec l'ID : ${userId}`, isAdmin: isAdmin });
     } else {
       res.status(404).json({ message: "Aucun document correspondant trouvé" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la connexion ou de l'insertion de l'utilisateur", error });
+    res.status(500).json({ message: "Erreur lors de la connexion de l'utilisateur", error });
   }
 });
 
 
-async function insertUserIntoMongoDB(userData) {
-  try {
-    await client.connect();
-    const usersCollection = client.db("Cluster0").collection("falconDb");
-    const result = await usersCollection.insertOne(userData);
-    return result.insertedId;
-  } catch (error) {
-    console.log("Erreur lors de l'insertion de l'utilisateur :", error);
-    return null;
-  } finally {
-    await client.close();
-  }
-}
-
-async function findUserInMongoDB(userId) {
-  try {
-    await client.connect();
-    const usersCollection = client.db("Cluster0").collection("falconDb");
-    const user = await usersCollection.findOne({ _id: new MongoClient.ObjectId(userId) });
-    return user;
-  } catch (error) {
-    console.log("Erreur lors de la recherche de l'utilisateur :", error);
-    return null;
-  } finally {
-    await client.close();
-  }
-}
-
-    
-    
-
-    // Ajoutez d'autres routes ici
-
-  } finally {
-    // Assure que le client se ferme lorsque vous terminez/erreur
-    await client.close();
-  }
-}
-
-run().catch(console.dir);
-
-// API Salesforce
 const token_url = "https://login.salesforce.com/services/oauth2/token";
 const token_payload = {
   grant_type: "password",
@@ -138,6 +62,6 @@ app.get("/api/salesforce_data", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Serveur en écoute sur le port ${PORT}`));
 
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
