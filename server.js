@@ -2,8 +2,9 @@ const express = require("express");
 const axios = require("axios");
 const qs = require("qs");
 const cors = require("cors");
-
-const userId = userCredential.user.uid;
+const firebase = require("firebase/app");
+require("firebase/auth");
+require("firebase/firestore");
 
 // API Salesforce
 const app = express();
