@@ -8,34 +8,40 @@ require("firebase/firestore");
 
 // API Salesforce
 const app = express();
-app.use(cors());
 app.use(express.json());
 
-app.post("/signin", async (req, res) => {
-  const { email, password } = req.body;
+// Route pour récupérer les données de l'utilisateur connecté
+app.get("/api/user", async (req, res) => {
+  // Vérifiez si un utilisateur est connecté
+  const currentUser = firebase.auth().currentUser;
+  if (!currentUser) {
+    res.status(401).send("Aucun utilisateur connecté");
+    return;
+  }
 
   try {
-    const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
-    const userId = userCredential.user.uid;
-    console.log(`Utilisateur connecté avec l'ID: ${userId}`);
-
-    const docRef = firebase.firestore().collection("users").doc(userId);
-    const doc = await docRef.get();
-
-    if (doc.exists) {
-      const userData = doc.data();
-      const isAdmin = userData.isAdmin;
-      res.status(200).json({ message: `Utilisateur connecté avec l'ID : ${userId}`, isAdmin: isAdmin });
-      console.log(`Utilisateur connecté avec l'ID : ${userId}, isAdmin: ${isAdmin}`);
-    } else {
-      res.status(404).json({ message: "Aucun document correspondant trouvé" });
-      console.log("Aucun document correspondant trouvé");
-    }
+    // Récupérez les données de l'utilisateur
+    const userData = await getUserData(currentUser);
+    res.json(userData);
+    console.log(`ID Firebase de l'utilisateur : ${currentUser.uid}`);
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la connexion de l'utilisateur", error });
-    console.log("Erreur lors de la connexion de l'utilisateur", error);
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des données de l'utilisateur" });
   }
 });
+
+// Fonction pour récupérer les données d'un utilisateur en utilisant son email
+async function getUserData(user) {
+  const db = firebase.firestore();
+  const q = db.collection("users").where("email", "==", user.email);
+  const querySnapshot = await q.get();
+  if (querySnapshot.empty) {
+    throw new Error("Aucun utilisateur correspondant trouvé dans la base de données");
+  }
+  const userData = querySnapshot.docs[0].data();
+  return userData;
+}
+
 
 const token_url = "https://login.salesforce.com/services/oauth2/token";
 const token_payload = {
@@ -62,12 +68,11 @@ app.get("/api/salesforce_data", async (req, res) => {
     });
 
     res.json(salesData);
-    console.log(`Données Salesforce récupérées : ${JSON.stringify(salesData)}`);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Une erreur est survenue lors de la récupération des données." });
-    console.log("Une erreur est survenue lors de la récupération des données.", error);
   }
 });
 
 const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
