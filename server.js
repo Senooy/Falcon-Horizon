@@ -22,11 +22,14 @@ app.post("/signin", async (req, res) => {
       const userData = doc.data();
       const isAdmin = userData.isAdmin;
       res.status(200).json({ message: `Utilisateur connecté avec l'ID : ${userId}`, isAdmin: isAdmin });
+      console.log(`Utilisateur connecté avec l'ID : ${userId}`);
     } else {
       res.status(404).json({ message: "Aucun document correspondant trouvé" });
+      console.log("Aucun document correspondant trouvé");
     }
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la connexion de l'utilisateur", error });
+    console.log("Erreur lors de la connexion de l'utilisateur", error);
   }
 });
 
