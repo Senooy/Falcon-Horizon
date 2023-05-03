@@ -2,13 +2,12 @@ const express = require("express");
 const axios = require("axios");
 const qs = require("qs");
 const cors = require("cors");
-const firebase = require("firebase/app");
-require("firebase/auth");
-require("firebase/firestore");
 
 // API Salesforce
 const app = express();
 app.use(express.json());
+
+const corsOptions = { origin: "http://localhost" };
 
 
 const token_url = "https://login.salesforce.com/services/oauth2/token";
