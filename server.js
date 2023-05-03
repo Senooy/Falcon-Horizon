@@ -7,8 +7,16 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 
+const allowedOrigins = ["http://app.falconmarketing.fr", "http://localhost:3000"];
+
 const corsOptions = {
-  origin: "http://app.falconmarketing.fr, http://localhost:3000",
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
