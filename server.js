@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 
 const corsOptions = {
-  origin: "http://app.falconmarketing.fr",
+  origin: "http://app.falconmarketing.fr, http://localhost:3000",
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
