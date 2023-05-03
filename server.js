@@ -7,8 +7,13 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 
-const corsOptions = { origin: "http://localhost" };
+const corsOptions = {
+  origin: "http://app.falconmarketing.fr",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
+app.use(cors(corsOptions));
 
 const token_url = "https://login.salesforce.com/services/oauth2/token";
 const token_payload = {
