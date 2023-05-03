@@ -10,38 +10,6 @@ require("firebase/firestore");
 const app = express();
 app.use(express.json());
 
-// Route pour récupérer les données de l'utilisateur connecté
-app.get("/api/user", async (req, res) => {
-  // Vérifiez si un utilisateur est connecté
-  const currentUser = firebase.auth().currentUser;
-  if (!currentUser) {
-    res.status(401).send("Aucun utilisateur connecté");
-    return;
-  }
-
-  try {
-    // Récupérez les données de l'utilisateur
-    const userData = await getUserData(currentUser);
-    res.json(userData);
-    console.log(`ID Firebase de l'utilisateur : ${currentUser.uid}`);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erreur lors de la récupération des données de l'utilisateur" });
-  }
-});
-
-// Fonction pour récupérer les données d'un utilisateur en utilisant son email
-async function getUserData(user) {
-  const db = firebase.firestore();
-  const q = db.collection("users").where("email", "==", user.email);
-  const querySnapshot = await q.get();
-  if (querySnapshot.empty) {
-    throw new Error("Aucun utilisateur correspondant trouvé dans la base de données");
-  }
-  const userData = querySnapshot.docs[0].data();
-  return userData;
-}
-
 
 const token_url = "https://login.salesforce.com/services/oauth2/token";
 const token_payload = {

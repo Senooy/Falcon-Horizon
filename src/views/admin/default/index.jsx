@@ -32,6 +32,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
+import AdminStatus from "./components/userInfo";
 import Tableau from "../dataTables/components/tableau1";
 
 
@@ -53,7 +54,8 @@ export default function UserReports() {
         columns={{ base: 1, md: 1, xl: 1 }}
         gap="20px"
         mb="20px"
-      ></SimpleGrid>
+      ></SimpleGrid> 
+      <AdminStatus />
     </Box>
   );
 }
