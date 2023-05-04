@@ -1,8 +1,8 @@
 const express = require("express");
 const axios = require("axios");
 const qs = require("qs");
-const cors = require("cors");
-const { exec } = require("child_process")
+const cors = require("cors")
+const { spawn } = require('child_process');
 
 // API Salesforce
 const app = express();
@@ -22,21 +22,22 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-app.get("/run-script", (req, res) => {
-  exec("python allsales.py", {async: true}, (error, stdout, stderr) => {
-    if (error) {
-      console.log(`Erreur: ${error.message}`);
-      res.status(500).send({ message: "Erreur lors de l'exécution du script Python." });
-      return;
-    }
-    if (stderr) {
-      console.log(`Erreur: ${stderr}`);
-      res.status(500).send({ message: "Erreur lors de l'exécution du script Python." });
-      return;
-    }
+// Ajoutez la route pour exécuter le script Python
+app.post('/api/regenerate-json', (req, res) => {
+  const pythonScript = spawn('python', ['/public/allsales.py']);
+  
+  pythonScript.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`);
   });
-
-  res.status(202).send({ message: "Le script a commencé à s'exécuter." });
+  
+  pythonScript.stderr.on('data', (data) => {
+    console.error(`stderr: ${data}`);
+  });
+  
+  pythonScript.on('close', (code) => {
+    console.log(`Python script exited with code ${code}`);
+    res.sendStatus(code === 0 ? 200 : 500);
+  });
 });
 
 

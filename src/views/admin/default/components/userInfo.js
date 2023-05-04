@@ -54,6 +54,20 @@ const Tableau = () => {
     return colorMode === "light" ? colors.light : colors.dark;
   };
 
+  const refreshJsonData = async () => {
+    try {
+      const response = await axios.post('/api/regenerate-json');
+      if (response.status === 200) {
+        fetchData(); // Réexécutez la fonction pour récupérer les données mises à jour
+      } else {
+        console.error('Erreur lors de la régénération du fichier all_sales.json');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la régénération du fichier all_sales.json:', error);
+    }
+  };
+  
+
   const fetchData = async () => {
     try {
       const response = await fetch("http://app.falconmarketing.fr/all_sales.json");
@@ -234,7 +248,12 @@ const Tableau = () => {
         mb={4}
        >
       Statistiques
+      
       </Button>
+      <Button onClick={refreshJsonData} colorScheme="blue" mb={4}>
+  Actualiser
+</Button>
+
   </Link>
   <Box mb={4}>
 
