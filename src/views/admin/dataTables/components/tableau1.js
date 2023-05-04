@@ -27,9 +27,11 @@ import { Link } from "react-router-dom";
 const PER_PAGE = 10;
 
 const Tableau = () => {
-  const periods = ["Semaine", "Mois", "Année"];
   const { colorMode } = useColorMode();
   const { user } = React.useContext(AuthContext);
+  const shouldHideTable = user && user.profileData && user.profileData.admin;
+
+  const periods = ["Semaine", "Mois", "Année"];
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -198,6 +200,8 @@ const Tableau = () => {
 
   
   return (
+
+    shouldHideTable ? null : 
     <Box
       bg={bgColor}
       borderRadius="5px"
