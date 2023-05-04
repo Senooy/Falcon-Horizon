@@ -56,16 +56,33 @@ const Tableau = () => {
     return colorMode === "light" ? colors.light : colors.dark;
   };
 
+  const refreshJsonData = async () => {
+    try {
+      const response = await axios.post('/api/all_sales');
+      if (response.status === 200) {
+        fetchData(); // Réexécutez la fonction pour récupérer les données mises à jour
+      } else {
+        console.error('Erreur lors de la régénération du fichier all_sales.json');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la régénération du fichier all_sales.json:', error);
+    }
+  };
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://app.falconmarketing.fr/api/all_sales');
-      setRecords(response.data);
-      setFilteredRecords(response.data);
+      const response = await fetch("http://app.falconmarketing.fr/all_sales.json");
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération du fichier all_sales.json");
+      }
+      const data = await response.json();
+      setRecords(data);
+      setFilteredRecords(data);
     } catch (error) {
-      console.error("Erreur lors de la récupération des données de l'API :", error);
+      console.error("Erreur lors de la récupération du fichier all_sales.json:", error);
     }
-  };  
+  };
+
   
   
 
@@ -224,6 +241,16 @@ const Tableau = () => {
 
       <div style={{ marginTop: "60px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
+      <IconButton
+       onClick={refreshJsonData}
+       colorScheme="blue"
+       aria-label="Actualiser"
+       icon={<FaRedo />}
+       size="sm" // Adjust the size using Chakra UI's predefined sizes, e.g., 'sm', 'md', or 'lg'
+       width="32px" // Customize the width using a specific value
+       height="32px" // Customize the height using a specific value
+       mb={4}
+       />
       <Link to="/admin/statistiques">
        <Button
         leftIcon={<MdBarChart />}
