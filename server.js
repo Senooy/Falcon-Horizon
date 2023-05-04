@@ -2,6 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const qs = require("qs");
 const cors = require("cors");
+const { exec } = require("child_process")
 
 // API Salesforce
 const app = express();
@@ -20,6 +21,31 @@ const corsOptions = {
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
+
+app.get("/run-script", (req, res) => {
+  exec("python allsales.py", (error, stdout, stderr) => {
+    if (error) {
+      console.log(`Erreur: ${error.message}`);
+      res.status(500).send({ message: "Erreur lors de l'exécution du script Python." });
+      return;
+    }
+    if (stderr) {
+      console.log(`Erreur: ${stderr}`);
+      res.status(500).send({ message: "Erreur lors de l'exécution du script Python." });
+      return;
+    }
+
+    fs.readFile("all_sales.json", "utf8", (err, data) => {
+      if (err) {
+        console.log(`Erreur lors de la lecture du fichier: ${err}`);
+        res.status(500).send({ message: "Erreur lors de la lecture du fichier all_sales.json." });
+        return;
+      }
+
+      res.send(JSON.parse(data));
+    });
+  });
+});
 
 app.use(cors(corsOptions));
 

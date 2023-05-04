@@ -20,9 +20,7 @@ import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
 import ReactPaginate from "react-paginate";
 import "./pagination.css";
-import StatusPieChart from "./StatusPieChart";
 import { FaAngleDown } from "react-icons/fa";
-import { column } from "stylis";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
 
@@ -35,7 +33,6 @@ const Tableau = () => {
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [sortConfig, setSortConfig] = useState({
     key: "CreatedDate",
     ascending: false,
