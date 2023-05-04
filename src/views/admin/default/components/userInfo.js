@@ -56,19 +56,19 @@ const Tableau = () => {
 
   const fetchData = async () => {
     try {
-      // Remplacez l'exécution du script Python par un appel API
-      const response = await axios.get("http://app.falconmarketing.fr:3001/api/run-python-script");
-      if (response.status === 200) {
-        const data = response.data;
-        setRecords(data.records);
-        setFilteredRecords(data.records);
-      } else {
-        console.error("Erreur lors de l'exécution du script Python");
+      const response = await fetch("http://app.falconmarketing.fr/all_sales.json");
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération du fichier all_sales.json");
       }
+      const data = await response.json();
+      setRecords(data);
+      setFilteredRecords(data);
     } catch (error) {
-      console.error("Erreur lors de l'appel de l'API:", error);
+      console.error("Erreur lors de la récupération du fichier all_sales.json:", error);
     }
   };
+  
+  
   
 
   const formatDate = (date) => {
