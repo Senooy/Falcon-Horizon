@@ -15,7 +15,10 @@ import {
   ButtonGroup,
   Button,
   Flex,
+  IconButton,
+  RepeatIcon,
 } from "@chakra-ui/react";
+import { FaRedo } from 'react-icons/fa';
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
 import ReactPaginate from "react-paginate";
@@ -240,6 +243,16 @@ const Tableau = () => {
 
       <div style={{ marginTop: "60px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
+      <IconButton
+  onClick={refreshJsonData}
+  colorScheme="blue"
+  aria-label="Actualiser"
+  icon={<FaRedo />}
+  size="sm" // Adjust the size using Chakra UI's predefined sizes, e.g., 'sm', 'md', or 'lg'
+  width="32px" // Customize the width using a specific value
+  height="32px" // Customize the height using a specific value
+  mb={4}
+/>
       <Link to="/admin/statistiques">
        <Button
         leftIcon={<MdBarChart />}
@@ -250,11 +263,10 @@ const Tableau = () => {
       Statistiques
       
       </Button>
-      <Button onClick={refreshJsonData} colorScheme="blue" mb={4}>
-  Actualiser
-</Button>
+      
 
   </Link>
+  
   <Box mb={4}>
 
   
