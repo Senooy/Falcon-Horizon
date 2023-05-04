@@ -23,7 +23,7 @@ const corsOptions = {
 };
 
 app.get("/run-script", (req, res) => {
-  exec("python allsales.py", (error, stdout, stderr) => {
+  exec("python allsales.py", {async: true}, (error, stdout, stderr) => {
     if (error) {
       console.log(`Erreur: ${error.message}`);
       res.status(500).send({ message: "Erreur lors de l'exécution du script Python." });
@@ -34,18 +34,11 @@ app.get("/run-script", (req, res) => {
       res.status(500).send({ message: "Erreur lors de l'exécution du script Python." });
       return;
     }
-
-    fs.readFile("all_sales.json", "utf8", (err, data) => {
-      if (err) {
-        console.log(`Erreur lors de la lecture du fichier: ${err}`);
-        res.status(500).send({ message: "Erreur lors de la lecture du fichier all_sales.json." });
-        return;
-      }
-
-      res.send(JSON.parse(data));
-    });
   });
+
+  res.status(202).send({ message: "Le script a commencé à s'exécuter." });
 });
+
 
 app.use(cors(corsOptions));
 
