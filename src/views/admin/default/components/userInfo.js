@@ -59,7 +59,7 @@ const Tableau = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('/api/all_sales');
+      const response = await axios.get('http://app.falconmarketing.fr/api/all_sales');
       setRecords(response.data);
       setFilteredRecords(response.data);
     } catch (error) {
