@@ -2,7 +2,8 @@ const express = require("express");
 const axios = require("axios");
 const qs = require("qs");
 const cors = require("cors")
-const { spawn } = require('child_process');
+const fs = require("fs");
+
 
 // API Salesforce
 const app = express();
@@ -79,12 +80,16 @@ app.get("/api/all_sales", async (req, res) => {
     const vendor_ids = await get_vendor_ids(data.access_token);
     const all_sales = await get_all_sales(data.access_token, vendor_ids);
 
-    // Compile les données dans un seul fichier JSON
     fs.writeFile("all_sales.json", JSON.stringify(all_sales, null, 2), (err) => {
-      if (err) throw err;
-      console.log("Toutes les ventes ont été compilées dans all_sales.json");
+      if (err) {
+        console.error(err);
+        res.status(500).json({ message: "Une erreur est survenue lors de la rédaction du fichier." });
+      } else {
+        console.log("Toutes les ventes ont été compilées dans all_sales.json");
+        res.json(all_sales);
+      }
     });
-
+    
     res.json(all_sales);
   } catch (error) {
     console.error(error);
