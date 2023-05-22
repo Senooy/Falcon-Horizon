@@ -190,11 +190,19 @@ const Tableau = () => {
   
   const pageCount = Math.ceil(filteredRecords.length / PER_PAGE);
   
-  const sortedRecords = sortRecords(filteredRecords).map((record) => ({
-  ...record,
-  CreatedDate: formatDate(record.CreatedDate),
-  ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
+  
+  // Vérifier si sortConfig.key est défini, sinon attribuer une valeur par défaut
+  const sortKey = sortConfig.key || "CreatedDate";
+  
+  // Vérifier si sortConfig.ascending est défini, sinon attribuer une valeur par défaut
+  const sortAscending = typeof sortConfig.ascending === "boolean" ? sortConfig.ascending : false;
+  
+  const sortedRecords = sortRecords(filteredRecords, sortKey, sortAscending).map((record) => ({
+    ...record,
+    CreatedDate: formatDate(record.CreatedDate),
+    ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
   }));
+  
 
   const bgColor = useColorModeValue("white", "gray.700");
 
