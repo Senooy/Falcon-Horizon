@@ -71,18 +71,14 @@ const Tableau = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch("http://app.falconmarketing.fr/all_sales.json");
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération du fichier all_sales.json");
-      }
-      const data = await response.json();
-      setRecords(data);
-      setFilteredRecords(data);
+      const { data } = await axios.get("http://app.falconmarketing.fr:3001/api/all_sales");
+      setRecords(data.records);
+      setFilteredRecords(data.records);
     } catch (error) {
-      console.error("Erreur lors de la récupération du fichier all_sales.json:", error);
+      console.log(error);
     }
   };
-
+  
   
   
 

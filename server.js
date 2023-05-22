@@ -88,7 +88,7 @@ app.get("/api/all_sales", async (req, res) => {
         console.log("Toutes les ventes ont été compilées dans all_sales.json");
         res.json(all_sales);
       }
-    });
+    });    
     
     res.json(all_sales);
   } catch (error) {
