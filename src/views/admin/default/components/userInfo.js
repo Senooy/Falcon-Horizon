@@ -71,9 +71,11 @@ const Tableau = () => {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get("http://app.falconmarketing.fr:3001/api/all_sales");
-      setRecords(data.records);
-      setFilteredRecords(data.records);
+      setTimeout(async () => {
+        const { data } = await axios.get("http://app.falconmarketing.fr:3001/api/all_sales");
+        setRecords(data.records);
+        setFilteredRecords(data.records);
+      }, 20000); // Le délai est de 5000 millisecondes, soit 5 secondes
     } catch (error) {
       console.log(error);
     }
