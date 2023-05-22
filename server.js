@@ -86,16 +86,16 @@ app.get("/api/all_sales", async (req, res) => {
         res.status(500).json({ message: "Une erreur est survenue lors de la rédaction du fichier." });
       } else {
         console.log("Toutes les ventes ont été compilées dans all_sales.json");
-        res.json(all_sales);
+        res.json(all_sales); // On n'envoie la réponse qu'une seule fois
       }
     });    
     
-    res.json(all_sales);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Une erreur est survenue lors de la récupération des données." });
   }
 });
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
