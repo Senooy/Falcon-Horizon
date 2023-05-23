@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   useColorMode,
@@ -15,33 +15,21 @@ import {
   ButtonGroup,
   Button,
   Flex,
-  IconButton,
 } from "@chakra-ui/react";
-import { FaRedo } from 'react-icons/fa';
-import axios from "axios";
-import { AuthContext } from "contexts/AuthContext";
-import ReactPaginate from "react-paginate";
-import "views/admin/dataTables/components/pagination.css";
 import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
+import ReactPaginate from "react-paginate";
 
 const PER_PAGE = 10;
 
 const AdminTableau = () => {
-  const { user } = useContext(AuthContext);
-
-  if (!user || !user.profileData || !user.profileData.admin) {
-    return null;
-  }
-
   return <Tableau />;
 };
 
 const Tableau = () => {
   const periods = ["Semaine", "Mois", "Année"];
   const { colorMode } = useColorMode();
-  const { user } = React.useContext(AuthContext);
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -56,33 +44,20 @@ const Tableau = () => {
     return colorMode === "light" ? colors.light : colors.dark;
   };
 
-  const refreshJsonData = async () => {
-    try {
-      const response = await axios.post('/api/all_sales');
-      if (response.status === 200) {
-        fetchData(); // Réexécutez la fonction pour récupérer les données mises à jour
-      } else {
-        console.error('Erreur lors de la régénération du fichier all_sales.json');
-      }
-    } catch (error) {
-      console.error('Erreur lors de la régénération du fichier all_sales.json:', error);
-    }
-  };
-
-  const fetchData = async () => {
-    try {
-      setTimeout(async () => {
-        const { data } = await axios.get("http://app.falconmarketing.fr:3001/api/all_sales");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://app.falconmarketing.fr/all_sales.json");
+        const data = await response.json();
         setRecords(data.records);
         setFilteredRecords(data.records);
-      }, 20000); // Le délai est de 5000 millisecondes, soit 5 secondes
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  
-  
-  
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const formatDate = (date) => {
     if (!date) {
@@ -91,12 +66,16 @@ const Tableau = () => {
     const d = new Date(date);
     return isNaN(d.getTime())
       ? ""
-      : `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}/${d.getFullYear()}`;
+      : `${d.getDate().toString().padStart(2, "0")}/${(
+          d.getMonth() + 1
+        ).toString().padStart(2, "0")}/${d.getFullYear()}`;
   };
 
   const sortRecords = (records) => {
+    if (!records) {
+      return [];
+    }
+
     return records.sort((a, b) => {
       const dateA = new Date(a[sortConfig.key]);
       const dateB = new Date(b[sortConfig.key]);
@@ -114,12 +93,10 @@ const Tableau = () => {
   };
 
   const toggleSortDirection = (key) => {
-    setSortConfig((prevConfig) => {
-      return {
-        key: key,
-        ascending: prevConfig.key === key ? !prevConfig.ascending : true,
-      };
-    });
+    setSortConfig((prevConfig) => ({
+      key: key,
+      ascending: prevConfig.key === key ? !prevConfig.ascending : true,
+    }));
   };
 
   const handleCollapseToggle = (rowId) => {
@@ -136,19 +113,17 @@ const Tableau = () => {
     "Progress",
     "Error",
     "Payed",
-    "EnCoursDeRattrapage", // Ajoutez le statut EnCoursDeRattrapage
+    "EnCoursDeRattrapage",
   ];
-
-
 
   const filterRecords = (period, status) => {
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
-  
+
     const filteredByPeriod = records.filter((record) => {
       const recordDate = new Date(record.CreatedDate);
       const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
-  
+
       switch (period) {
         case "Semaine":
           return diffDays <= 7;
@@ -160,49 +135,41 @@ const Tableau = () => {
           return true;
       }
     });
-  
+
     const filteredByStatus =
-    status === "Tous"
-      ? filteredByPeriod
-      : filteredByPeriod.filter((record) => record.Status__c === status || record.ConnectionStatus__c === status); // Modifiez cette ligne pour inclure le statut EnCoursDeRattrapage
+      status === "Tous"
+        ? filteredByPeriod
+        : filteredByPeriod.filter(
+            (record) =>
+              record.Status__c === status ||
+              record.ConnectionStatus__c === status ||
+              record.Status__c === "EnCoursDeRattrapage"
+          );
 
     return filteredByStatus;
   };
-
 
   const handleFilter = (period, status) => {
     const filtered = filterRecords(period, status);
     setFilteredRecords(filtered);
     setFilter({ period, status });
   };
-  
-  
 
-  useEffect(() => {
-  fetchData();
-  }, [user]);
-  
   function handlePageClick({ selected: selectedPage }) {
-  setCurrentPage(selectedPage);
+    setCurrentPage(selectedPage);
   }
-  
+
   const offset = currentPage * PER_PAGE;
-  
-  const pageCount = Math.ceil(filteredRecords.length / PER_PAGE);
-  
-  
-  // Vérifier si sortConfig.key est défini, sinon attribuer une valeur par défaut
-  const sortKey = sortConfig.key || "CreatedDate";
-  
-  // Vérifier si sortConfig.ascending est défini, sinon attribuer une valeur par défaut
-  const sortAscending = typeof sortConfig.ascending === "boolean" ? sortConfig.ascending : false;
-  
-  const sortedRecords = sortRecords(filteredRecords, sortKey, sortAscending).map((record) => ({
+
+  const pageCount = filteredRecords
+    ? Math.ceil(filteredRecords.length / PER_PAGE)
+    : 0;
+
+  const sortedRecords = sortRecords(filteredRecords).map((record) => ({
     ...record,
     CreatedDate: formatDate(record.CreatedDate),
     ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
   }));
-  
 
   const bgColor = useColorModeValue("white", "gray.700");
 
@@ -214,7 +181,7 @@ const Tableau = () => {
       Error: "rgba(255, 0, 0, 0.3)",
       Payed: "rgba(8, 254, 0, 0.91)",
     };
-  
+
     const darkColors = {
       ToConfirm: "rgba(0, 108, 254, 0.1)",
       Validated: "rgba(3, 255, 0, 0.4)",
@@ -222,15 +189,13 @@ const Tableau = () => {
       Error: "rgba(255, 0, 0, 0.4)",
       Payed: "rgba(8, 254, 0, 0.91)",
     };
-  
+
     return {
       light: lightColors[status] || "",
       dark: darkColors[status] || "",
     };
   };
-  
 
-  
   return (
     <Box
       bg={bgColor}
@@ -243,205 +208,175 @@ const Tableau = () => {
       minH="1000px"
       minW="300px"
     >
-  
-
       <div style={{ marginTop: "60px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
-      <IconButton
-       onClick={refreshJsonData}
-       colorScheme="blue"
-       aria-label="Actualiser"
-       icon={<FaRedo />}
-       size="sm" // Adjust the size using Chakra UI's predefined sizes, e.g., 'sm', 'md', or 'lg'
-       width="32px" // Customize the width using a specific value
-       height="32px" // Customize the height using a specific value
-       mb={4}
-       />
-      <Link to="/admin/statistiques">
-       <Button
-        leftIcon={<MdBarChart />}
-        colorScheme="brand"
-        variant="solid"
-        mb={4}
-       >
-      Statistiques
-      
-      </Button>
-      
-
-  </Link>
-  
-  <Box mb={4}>
-
-  
-
-    <ButtonGroup isAttached>
-      <Button
-        size="md"
-        colorScheme={filter.period === "Tous" ? "brand" : "gray"}
-        onClick={() => handleFilter("Tous", filter.status)}
-        px={10}
-      >
-        Tous
-      </Button>
-      {periods.map((period) => (
-        <Button
-          key={period}
-          size="md"
-          colorScheme={filter.period === period ? "brand" : "gray"}
-          onClick={() => handleFilter(period, filter.status)}
-        >
-          {period}
-        </Button>
-      ))}
-    </ButtonGroup>
-  </Box>
-
-  <Box mb={4}>
-      <ButtonGroup
-        isAttached
-        spacing={20}
-        width={{ base: "100%", md: "auto" }}
-        mb={4}
-      >
-        <Button
-          size="md"
-          colorScheme={filter.status === "Tous" ? "brand" : "gray"}
-          onClick={() => handleFilter(filter.period, "Tous")}
-          px={10}
-        >
-          Tous
-        </Button>
-        {statuses.map((status) => (
+        <Link to="/admin/statistiques">
           <Button
-            key={status}
-            size="md"
-            colorScheme={filter.status === status ? "blue" : "gray"}
-            onClick={() => handleFilter(filter.period, status)}
-            px={10}
+            leftIcon={<MdBarChart />}
+            colorScheme="brand"
+            variant="solid"
+            mb={4}
           >
-            {status}
+            Statistiques
           </Button>
-        ))}
-        <Button // Ajoutez un nouveau bouton pour le statut EnCoursDeRattrapage
-          size="md"
-          colorScheme={filter.status === "EnCoursDeRattrapage" ? "blue" : "gray"}
-          onClick={() => handleFilter(filter.period, "EnCoursDeRattrapage")}
-          px={10}
-        >
-          EnCoursDeRattrapage
-        </Button>
-      </ButtonGroup>
-    </Box>
-
-</Flex>
-
-  
-<Table variant="simple"
-overflow={{ base: "auto", md: "auto" }}>
-  <Thead>
-    <Tr>
-      <Th>Détails</Th>
-      <Th
-        onClick={() => toggleSortDirection("CreatedDate")}
-        style={{ cursor: "pointer" }}
-      >
-        Date de la vente
-      </Th>
-      <Th>Nom</Th>
-      <Th>Date de raccordement</Th>
-      <Th>Statut</Th>
-    </Tr>
-  </Thead>
-
-  <Tbody>
-    {sortedRecords
-      .slice(offset, offset + PER_PAGE)        .map((record, index) => (
-        <React.Fragment key={record.Id}>
-          <Tr bg={getRowColor(record.Status__c)}>
-            <Td
-              onClick={() => handleCollapseToggle(record.Id)}
-              style={{ cursor: "pointer" }}
+        </Link>
+        <Box mb={4}>
+          <ButtonGroup isAttached>
+            <Button
+              size="md"
+              colorScheme={filter.period === "Tous" ? "brand" : "gray"}
+              onClick={() => handleFilter("Tous", filter.status)}
+              px={10}
             >
-              {record.TchPhone__c} <FaAngleDown />
-            </Td>
-            <Td>{record.CreatedDate}</Td>
-            <Td>{record.TchProspectName__c}</Td>
-            <Td>{record.ConnectingDatePlanned__c}</Td>
-            <Td>{record.Status__c}</Td>
-
-          </Tr>
-          <Collapse in={collapsedRowId === record.Id}>
-            <Box>
-              <VStack align="start" mt={2} mb={2}>
-                <Text>
-                  <strong>Adresse :</strong> {record.TchAddress__c}
-                </Text>
-                <Text>
-                  <strong>Mobile :</strong>{" "}
-                  <a
-                    href="tel:{record.ProspectMobilePhone__c}"
-                    style={{ color: "blue" }}
-                  >
-                    {record.ProspectMobilePhone__c}
-                  </a>
-                </Text>
-                <Text>
-                  <strong>Statut du raccordement :</strong>{record.ConnectionStatus__c}
-                </Text>
-                <Text>
-                  <strong>Offre :</strong> {record.OfferName__c}
-                </Text>
-                <Text>
-                  <strong>Famille de l'offre :</strong>{" "}
-                  {record.FamilyOffer__c}
-                </Text>
-                <Text>
-                  <strong>Date de signature :</strong>{" "}
-                  {formatDate(record.SignatureDate__c)}
-                </Text>
-                <Text>
-                  <strong>Date de validation :</strong>{" "}
-                  {formatDate(record.ValidationDate__c)}
-                </Text>
-                <Text>
-                  <strong>Type de vente :</strong>{" "}
-                  {record.CustomerType__c}
-                </Text>
-                <Text>
-                  <strong>Numéro de commande :</strong>{" "}
-                  {record.OrderNumber__c}
-                </Text>
-                <Text>
-                  <strong>Numéro de panier :</strong>{" "}
-                  {record.BasketNumber__c}
-                </Text>
-                <Text>
-                  <strong>Commentaire du call :</strong>{" "}
-                  {record.Comment__c}
-                </Text>
-              </VStack>
-            </Box>
-          </Collapse>
-        </React.Fragment>
-      ))}
-  </Tbody>
-</Table>
-<Box mt={6}>
-  <ReactPaginate
-    previousLabel={"←"}
-    nextLabel={"→"}
-    pageCount={pageCount}
-    onPageChange={handlePageClick}
-    containerClassName={"pagination"}
-    previousLinkClassName={"pagination__link"}
-    nextLinkClassName={"pagination__link"}
-    disabledClassName={"pagination__link--disabled"}
-    activeClassName={"pagination__link--active"}
-  />
-</Box>
-</Box>
-);
+              Tous
+            </Button>
+            {periods.map((period) => (
+              <Button
+                key={period}
+                size="md"
+                colorScheme={filter.period === period ? "brand" : "gray"}
+                onClick={() => handleFilter(period, filter.status)}
+              >
+                {period}
+              </Button>
+            ))}
+          </ButtonGroup>
+        </Box>
+        <Box mb={4}>
+          <ButtonGroup
+            isAttached
+            spacing={20}
+            width={{ base: "100%", md: "auto" }}
+            mb={4}
+          >
+            <Button
+              size="md"
+              colorScheme={filter.status === "Tous" ? "brand" : "gray"}
+              onClick={() => handleFilter(filter.period, "Tous")}
+              px={10}
+            >
+              Tous
+            </Button>
+            {statuses.map((status) => (
+              <Button
+                key={status}
+                size="md"
+                colorScheme={filter.status === status ? "blue" : "gray"}
+                onClick={() => handleFilter(filter.period, status)}
+                px={10}
+              >
+                {status}
+              </Button>
+            ))}
+          </ButtonGroup>
+        </Box>
+      </Flex>
+      <>
+        <Table variant="simple" overflow={{ base: "auto", md: "auto" }}>
+          <Thead>
+            <Tr>
+              <Th>Détails</Th>
+              <Th
+                onClick={() => toggleSortDirection("CreatedDate")}
+                style={{ cursor: "pointer" }}
+              >
+                Date de la vente
+              </Th>
+              <Th>Nom</Th>
+              <Th>Date de raccordement</Th>
+              <Th>Statut</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {sortedRecords
+              .slice(offset, offset + PER_PAGE)
+              .map((record, index) => (
+                <React.Fragment key={record.Id}>
+                  <Tr bg={getRowColor(record.Status__c)}>
+                    <Td
+                      onClick={() => handleCollapseToggle(record.Id)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {record.TchPhone__c} <FaAngleDown />
+                    </Td>
+                    <Td>{record.CreatedDate}</Td>
+                    <Td>{record.TchProspectName__c}</Td>
+                    <Td>{record.ConnectingDatePlanned__c}</Td>
+                    <Td>{record.Status__c}</Td>
+                  </Tr>
+                  <Collapse in={collapsedRowId === record.Id}>
+                    <Box>
+                      <VStack align="start" mt={2} mb={2}>
+                        <Text>
+                          <strong>Adresse :</strong> {record.TchAddress__c}
+                        </Text>
+                        <Text>
+                          <strong>Mobile :</strong>{" "}
+                          <a
+                            href={`tel:${record.ProspectMobilePhone__c}`}
+                            style={{ color: "blue" }}
+                          >
+                            {record.ProspectMobilePhone__c}
+                          </a>
+                        </Text>
+                        <Text>
+                          <strong>Statut du raccordement :</strong>{" "}
+                          {record.ConnectionStatus__c}
+                        </Text>
+                        <Text>
+                          <strong>Offre :</strong> {record.OfferName__c}
+                        </Text>
+                        <Text>
+                          <strong>Famille de l'offre :</strong>{" "}
+                          {record.FamilyOffer__c}
+                        </Text>
+                        <Text>
+                          <strong>Date de signature :</strong>{" "}
+                          {formatDate(record.SignatureDate__c)}
+                        </Text>
+                        <Text>
+                          <strong>Date de validation :</strong>{" "}
+                          {formatDate(record.ValidationDate__c)}
+                        </Text>
+                        <Text>
+                          <strong>Type de vente :</strong>{" "}
+                          {record.CustomerType__c}
+                        </Text>
+                        <Text>
+                          <strong>Numéro de commande :</strong>{" "}
+                          {record.OrderNumber__c}
+                        </Text>
+                        <Text>
+                          <strong>Numéro de panier :</strong>{" "}
+                          {record.BasketNumber__c}
+                        </Text>
+                        <Text>
+                          <strong>Commentaire du call :</strong>{" "}
+                          {record.Comment__c}
+                        </Text>
+                      </VStack>
+                    </Box>
+                  </Collapse>
+                </React.Fragment>
+              ))}
+          </Tbody>
+        </Table>
+        <Box mt={6}>
+          <ReactPaginate
+            previousLabel={"←"}
+            nextLabel={"→"}
+            pageCount={pageCount}
+            onPageChange={handlePageClick}
+            containerClassName={"pagination"}
+            previousLinkClassName={"pagination__link"}
+            nextLinkClassName={"pagination__link"}
+            disabledClassName={"pagination__link--disabled"}
+            activeClassName={"pagination__link--active"}
+          />
+        </Box>
+      </>
+    </Box>
+  );
 };
 
 export default AdminTableau;
