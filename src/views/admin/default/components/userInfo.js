@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   useColorMode,
@@ -15,23 +15,33 @@ import {
   ButtonGroup,
   Button,
   Flex,
+  IconButton,
 } from "@chakra-ui/react";
+import { FaRedo } from 'react-icons/fa';
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
 import ReactPaginate from "react-paginate";
-import './pagination.css'
+import "views/admin/dataTables/components/pagination.css";
 import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 const PER_PAGE = 10;
 
+const AdminTableau = () => {
+  const { user } = useContext(AuthContext);
+
+  if (!user || !user.profileData || !user.profileData.admin) {
+    return null;
+  }
+
+  return <Tableau />;
+};
+
 const Tableau = () => {
+  const periods = ["Semaine", "Mois", "Année"];
   const { colorMode } = useColorMode();
   const { user } = React.useContext(AuthContext);
-  const shouldHideTable = user && user.profileData && user.profileData.admin;
-
-  const periods = ["Semaine", "Mois", "Année"];
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -45,17 +55,35 @@ const Tableau = () => {
     const colors = getRowColors(status);
     return colorMode === "light" ? colors.light : colors.dark;
   };
-  
+
+  const refreshJsonData = async () => {
+    try {
+      const response = await axios.post('/api/all_sales');
+      if (response.status === 200) {
+        fetchData(); // Réexécutez la fonction pour récupérer les données mises à jour
+      } else {
+        console.error('Erreur lors de la régénération du fichier all_sales.json');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la régénération du fichier all_sales.json:', error);
+    }
+  };
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get("http://app.falconmarketing.fr/all_sales.json");
-      setRecords(data.records);
-      setFilteredRecords(data.records);
+      const response = await fetch("http://app.falconmarketing.fr/all_sales.json");
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération du fichier all_sales.json");
+      }
+      const data = await response.json();
+      setRecords(data);
+      setFilteredRecords(data);
     } catch (error) {
-      console.log(error);
+      console.error("Erreur lors de la récupération du fichier all_sales.json:", error);
     }
   };
+
+  
   
 
   const formatDate = (date) => {
@@ -198,8 +226,6 @@ const Tableau = () => {
 
   
   return (
-
-    shouldHideTable ? null : 
     <Box
       bg={bgColor}
       borderRadius="5px"
@@ -215,6 +241,16 @@ const Tableau = () => {
 
       <div style={{ marginTop: "60px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
+      <IconButton
+       onClick={refreshJsonData}
+       colorScheme="blue"
+       aria-label="Actualiser"
+       icon={<FaRedo />}
+       size="sm" // Adjust the size using Chakra UI's predefined sizes, e.g., 'sm', 'md', or 'lg'
+       width="32px" // Customize the width using a specific value
+       height="32px" // Customize the height using a specific value
+       mb={4}
+       />
       <Link to="/admin/statistiques">
        <Button
         leftIcon={<MdBarChart />}
@@ -223,8 +259,12 @@ const Tableau = () => {
         mb={4}
        >
       Statistiques
+      
       </Button>
+      
+
   </Link>
+  
   <Box mb={4}>
 
   
@@ -397,4 +437,5 @@ overflow={{ base: "auto", md: "auto" }}>
 </Box>
 );
 };
-export default Tableau;
+
+export default AdminTableau;
