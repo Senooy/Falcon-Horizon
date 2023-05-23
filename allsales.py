@@ -6,11 +6,11 @@ import time
 # Constants for Salesforce authentication
 TOKEN_URL = "https://login.salesforce.com/services/oauth2/token"
 TOKEN_PAYLOAD = {
-  "grant_type": "password",
-  "client_id": "3MVG9I5UQ_0k_hTlxl9SwXkHaaX5kX0qAYQOq8c.PkG5DFWIFEwsrzI496JZ.GmBIIHFqnwDc75JvefLHSe.7",
-  "client_secret": "352231377BC938C6935CBC9E243BF1180120947E65594D9EC35A6F230E3DFAA4",
-  "username": "falcon@api.circet",
-  "password": "Yfauconapi59-HJ4GRqJAcl9stoSszZ1sa1g1",
+    "grant_type": "password",
+    "client_id": "3MVG9I5UQ_0k_hTlxl9SwXkHaaX5kX0qAYQOq8c.PkG5DFWIFEwsrzI496JZ.GmBIIHFqnwDc75JvefLHSe.7",
+    "client_secret": "352231377BC938C6935CBC9E243BF1180120947E65594D9EC35A6F230E3DFAA4",
+    "username": "falcon@api.circet",
+    "password": "Yfauconapi59-HJ4GRqJAcl9stoSszZ1sa1g1",
 }
 
 # Get Salesforce access token
@@ -63,6 +63,7 @@ def get_all_sales(access_token, vendor_ids):
 
 # Main function
 def main():
+    print("Starting main function...")
     access_token = get_salesforce_access_token()
     print(f"Access token: {access_token}")
     vendor_ids = get_vendor_ids(access_token)
@@ -75,7 +76,7 @@ def main():
 
     print("All sales have been compiled into all_sales.json")
 
-# Schedule main function to run every 30 minutes
+# Schedule main function to run every 3 minutes
 schedule.every(3).minutes.do(main)
 
 # Run the scheduled jobs indefinitely
