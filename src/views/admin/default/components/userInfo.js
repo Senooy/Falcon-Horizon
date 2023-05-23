@@ -19,7 +19,7 @@ import {
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
 import ReactPaginate from "react-paginate";
-import 'src/views/admin/dataTables/components/pagination.css'
+import './pagination.css'
 import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
