@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   useColorMode,
@@ -15,21 +15,33 @@ import {
   ButtonGroup,
   Button,
   Flex,
+  IconButton,
 } from "@chakra-ui/react";
+import { FaRedo } from 'react-icons/fa';
+import axios from "axios";
+import { AuthContext } from "contexts/AuthContext";
+import ReactPaginate from "react-paginate";
+import "views/admin/dataTables/components/pagination.css";
 import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
-import ReactPaginate from "react-paginate";
 
 const PER_PAGE = 10;
 
 const AdminTableau = () => {
+  const { user } = useContext(AuthContext);
+
+  if (!user || !user.profileData || !user.profileData.admin) {
+    return null;
+  }
+
   return <Tableau />;
 };
 
 const Tableau = () => {
   const periods = ["Semaine", "Mois", "Année"];
   const { colorMode } = useColorMode();
+  const { user } = React.useContext(AuthContext);
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -39,27 +51,28 @@ const Tableau = () => {
   });
   const [collapsedRowId, setCollapsedRowId] = useState(null);
   const [filter, setFilter] = useState({ period: "Tous", status: "Tous" });
+  const [isLoading, setIsLoading] = useState(true); // Nouvel état pour indiquer le chargement des données
   const getRowColor = (status) => {
     const colors = getRowColors(status);
     return colorMode === "light" ? colors.light : colors.dark;
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://app.falconmarketing.fr/all_sales.json");
-        const data = await response.json();
-        setRecords(data.records);
-        setFilteredRecords(data.records);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-  
-    fetchData();
-  }, []);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await axios.get("/all_sales.json");
+      setRecords(data.records);
+      setFilteredRecords(data.records);
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
+  };
   
 
+  
   const formatDate = (date) => {
     if (!date) {
       return "";
@@ -67,16 +80,12 @@ const Tableau = () => {
     const d = new Date(date);
     return isNaN(d.getTime())
       ? ""
-      : `${d.getDate().toString().padStart(2, "0")}/${(
-          d.getMonth() + 1
-        ).toString().padStart(2, "0")}/${d.getFullYear()}`;
+      : `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}/${d.getFullYear()}`;
   };
 
   const sortRecords = (records) => {
-    if (!records) {
-      return [];
-    }
-
     return records.sort((a, b) => {
       const dateA = new Date(a[sortConfig.key]);
       const dateB = new Date(b[sortConfig.key]);
@@ -94,10 +103,12 @@ const Tableau = () => {
   };
 
   const toggleSortDirection = (key) => {
-    setSortConfig((prevConfig) => ({
-      key: key,
-      ascending: prevConfig.key === key ? !prevConfig.ascending : true,
-    }));
+    setSortConfig((prevConfig) => {
+      return {
+        key: key,
+        ascending: prevConfig.key === key ? !prevConfig.ascending : true,
+      };
+    });
   };
 
   const handleCollapseToggle = (rowId) => {
@@ -114,17 +125,17 @@ const Tableau = () => {
     "Progress",
     "Error",
     "Payed",
-    "EnCoursDeRattrapage",
+    "EnCoursDeRattrapage", // Ajoutez le statut EnCoursDeRattrapage
   ];
 
   const filterRecords = (period, status) => {
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
-
+  
     const filteredByPeriod = records.filter((record) => {
       const recordDate = new Date(record.CreatedDate);
       const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
-
+  
       switch (period) {
         case "Semaine":
           return diffDays <= 7;
@@ -136,16 +147,11 @@ const Tableau = () => {
           return true;
       }
     });
-
+  
     const filteredByStatus =
-      status === "Tous"
-        ? filteredByPeriod
-        : filteredByPeriod.filter(
-            (record) =>
-              record.Status__c === status ||
-              record.ConnectionStatus__c === status ||
-              record.Status__c === "EnCoursDeRattrapage"
-          );
+    status === "Tous"
+      ? filteredByPeriod
+      : filteredByPeriod.filter((record) => record.Status__c === status || record.ConnectionStatus__c === status); // Modifiez cette ligne pour inclure le statut EnCoursDeRattrapage
 
     return filteredByStatus;
   };
@@ -155,17 +161,20 @@ const Tableau = () => {
     setFilteredRecords(filtered);
     setFilter({ period, status });
   };
-
+  
+  useEffect(() => {
+    fetchData();
+  }, [user]);
+  
   function handlePageClick({ selected: selectedPage }) {
     setCurrentPage(selectedPage);
   }
-
+  
   const offset = currentPage * PER_PAGE;
+  
+  const pageCount = filteredRecords ? Math.ceil(filteredRecords.length / PER_PAGE) : 0;
 
-  const pageCount = filteredRecords
-    ? Math.ceil(filteredRecords.length / PER_PAGE)
-    : 0;
-
+  
   const sortedRecords = sortRecords(filteredRecords).map((record) => ({
     ...record,
     CreatedDate: formatDate(record.CreatedDate),
@@ -182,7 +191,7 @@ const Tableau = () => {
       Error: "rgba(255, 0, 0, 0.3)",
       Payed: "rgba(8, 254, 0, 0.91)",
     };
-
+  
     const darkColors = {
       ToConfirm: "rgba(0, 108, 254, 0.1)",
       Validated: "rgba(3, 255, 0, 0.4)",
@@ -190,13 +199,13 @@ const Tableau = () => {
       Error: "rgba(255, 0, 0, 0.4)",
       Payed: "rgba(8, 254, 0, 0.91)",
     };
-
+  
     return {
       light: lightColors[status] || "",
       dark: darkColors[status] || "",
     };
   };
-
+  
   return (
     <Box
       bg={bgColor}
@@ -269,10 +278,20 @@ const Tableau = () => {
                 {status}
               </Button>
             ))}
+            <Button // Ajoutez un nouveau bouton pour le statut EnCoursDeRattrapage
+              size="md"
+              colorScheme={filter.status === "EnCoursDeRattrapage" ? "blue" : "gray"}
+              onClick={() => handleFilter(filter.period, "EnCoursDeRattrapage")}
+              px={10}
+            >
+              EnCoursDeRattrapage
+            </Button>
           </ButtonGroup>
         </Box>
       </Flex>
-      <>
+      {isLoading ? (
+        <Text align="center">Chargement des données...</Text>
+      ) : (
         <Table variant="simple" overflow={{ base: "auto", md: "auto" }}>
           <Thead>
             <Tr>
@@ -362,20 +381,20 @@ const Tableau = () => {
               ))}
           </Tbody>
         </Table>
-        <Box mt={6}>
-          <ReactPaginate
-            previousLabel={"←"}
-            nextLabel={"→"}
-            pageCount={pageCount}
-            onPageChange={handlePageClick}
-            containerClassName={"pagination"}
-            previousLinkClassName={"pagination__link"}
-            nextLinkClassName={"pagination__link"}
-            disabledClassName={"pagination__link--disabled"}
-            activeClassName={"pagination__link--active"}
-          />
-        </Box>
-      </>
+      )}
+      <Box mt={6}>
+        <ReactPaginate
+          previousLabel={"←"}
+          nextLabel={"→"}
+          pageCount={pageCount}
+          onPageChange={handlePageClick}
+          containerClassName={"pagination"}
+          previousLinkClassName={"pagination__link"}
+          nextLinkClassName={"pagination__link"}
+          disabledClassName={"pagination__link--disabled"}
+          activeClassName={"pagination__link--active"}
+        />
+      </Box>
     </Box>
   );
 };
