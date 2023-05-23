@@ -71,7 +71,7 @@ const Tableau = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch("http://app.falconmarketing.fr/public/all_sales.json");
+      const response = await fetch("http://app.falconmarketing.fr/all_sales.json");
       if (!response.ok) {
         throw new Error("Erreur lors de la récupération du fichier all_sales.json");
       }
