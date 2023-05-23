@@ -49,14 +49,11 @@ const Tableau = () => {
 
   const fetchData = async () => {
     try {
-      setIsLoading(true);
       const { data } = await axios.get("/all_sales.json");
       setRecords(data.records);
       setFilteredRecords(data.records);
-      setIsLoading(false);
     } catch (error) {
       console.log(error);
-      setIsLoading(false);
     }
   };
   
