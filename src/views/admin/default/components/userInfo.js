@@ -47,7 +47,7 @@ const Tableau = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://app.falconmarketing.fr/all_sales.json");
+        const response = await fetch("all_sales.json");
         const data = await response.json();
         setRecords(data.records);
         setFilteredRecords(data.records);
@@ -55,7 +55,7 @@ const Tableau = () => {
         console.log(error);
       }
     };
-
+  
     fetchData();
   }, []);
 
