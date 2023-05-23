@@ -71,7 +71,9 @@ const Tableau = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch("http://app.falconmarketing.fr/all_sales.json");
+      const timestamp = Date.now(); // Génère un horodatage actuel
+      const url = `http://app.falconmarketing.fr/all_sales.json?timestamp=${timestamp}`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Erreur lors de la récupération du fichier all_sales.json");
       }
@@ -82,7 +84,7 @@ const Tableau = () => {
       console.error("Erreur lors de la récupération du fichier all_sales.json:", error);
     }
   };
-
+  
   
   
 
