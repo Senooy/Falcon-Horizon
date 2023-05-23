@@ -10,7 +10,9 @@ const app = express();
 app.use(express.json());
 
 
-app.use(cors())
+app.use(cors({
+  origin: 'http://localhost:3000' // Remplacez 3000 par le port que vous utilisez pour votre application front-end
+}));
 
 const token_url = "https://login.salesforce.com/services/oauth2/token";
 const token_payload = {
