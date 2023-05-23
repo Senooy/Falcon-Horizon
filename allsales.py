@@ -76,7 +76,7 @@ def main():
     print("All sales have been compiled into all_sales.json")
 
 # Schedule main function to run every 30 minutes
-schedule.every(30).minutes.do(main)
+schedule.every(3).minutes.do(main)
 
 # Run the scheduled jobs indefinitely
 while True:
