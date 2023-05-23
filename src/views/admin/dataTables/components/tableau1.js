@@ -24,7 +24,7 @@ import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
 
-const PER_PAGE = 10;
+const PER_PAGE = 100;
 
 const Tableau = () => {
   const { colorMode } = useColorMode();
