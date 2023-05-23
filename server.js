@@ -10,9 +10,7 @@ const app = express();
 app.use(express.json());
 
 
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://app.falconmarketing.fr']
-}));
+app.use(cors());
 
 const token_url = "https://login.salesforce.com/services/oauth2/token";
 const token_payload = {
