@@ -114,11 +114,11 @@ const Tableau = () => {
   ];
   
 
-  const filterRecords = (period, status) => {
+  const filterRecords = (period, status, hasConnectingDate) => {
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
   
-    const filteredByPeriod = records.filter((record) => {
+    let filteredByPeriod = records.filter((record) => {
       const recordDate = new Date(record.CreatedDate);
       const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
   
@@ -134,21 +134,29 @@ const Tableau = () => {
       }
     });
   
-    const filteredByStatus =
-    status === "Tous"
-      ? filteredByPeriod
-      : filteredByPeriod.filter((record) => record.Status__c === status || record.ConnectionStatus__c === status); // Modifiez cette ligne pour inclure le statut EnCoursDeRattrapage
-
+    let filteredByStatus =
+      status === "Tous"
+        ? filteredByPeriod
+        : filteredByPeriod.filter(
+            (record) =>
+              record.Status__c === status || record.ConnectionStatus__c === status
+          ); // Modifiez cette ligne pour inclure le statut EnCoursDeRattrapage
+  
+    if (hasConnectingDate) {
+      filteredByStatus = filteredByStatus.filter(
+        (record) => record.ConnectingDatePlanned__c && record.ConnectingDatePlanned__c.length > 0
+      );
+    }
+  
     return filteredByStatus;
   };
 
 
-  const handleFilter = (period, status) => {
-    const filtered = filterRecords(period, status);
+  const handleFilter = (period, status, hasConnectingDate) => {
+    const filtered = filterRecords(period, status, hasConnectingDate);
     setFilteredRecords(filtered);
     setFilter({ period, status });
   };
-  
   
 
   useEffect(() => {
@@ -223,6 +231,7 @@ const Tableau = () => {
        >
       Statistiques
       </Button>
+
   </Link>
   <Box mb={4}>
 
@@ -269,6 +278,18 @@ const Tableau = () => {
     </Button>
   ))}
 </ButtonGroup>
+
+    </Box>
+
+    <Box mb={4}>
+    <Button
+  size="md"
+  colorScheme="blue"
+  onClick={() => handleFilter(filter.period, filter.status, true)}
+  px={10}
+>
+  Avec Date de raccordement
+</Button>
 
     </Box>
 
