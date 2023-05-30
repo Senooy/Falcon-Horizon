@@ -344,6 +344,7 @@ overflow={{ base: "auto", md: "auto" }}>
       >
         Date de la vente
       </Th>
+      <Th>Vendeur</Th>
       <Th>Nom</Th>
       <Th>Date de raccordement</Th>
       <Th>Statut</Th>
@@ -361,6 +362,7 @@ overflow={{ base: "auto", md: "auto" }}>
             >
               {record.TchPhone__c} <FaAngleDown />
             </Td>
+            <Td>{record.VendorName__c}</Td>
             <Td>{record.CreatedDate}</Td>
             <Td>{record.TchProspectName__c}</Td>
             <Td>{record.ConnectingDatePlanned__c}</Td>
