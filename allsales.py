@@ -1,7 +1,5 @@
 import requests
 import json
-import schedule
-import time
 
 # Constants for Salesforce authentication
 TOKEN_URL = "https://login.salesforce.com/services/oauth2/token"
@@ -76,10 +74,5 @@ def main():
 
     print("All sales have been compiled into all_sales.json")
 
-# Schedule main function to run every 3 minutes
-schedule.every(3).minutes.do(main)
-
-# Run the scheduled jobs indefinitely
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# Run the main function once
+main()
