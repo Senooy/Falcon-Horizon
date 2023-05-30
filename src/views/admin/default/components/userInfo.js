@@ -64,14 +64,25 @@ const handleSearchChange = (e) => {
 };
 
 const searchRecords = (records) => {
-  return records.filter(record => {
-    const { TchProspectName__c, ProspectMobilePhone__c, OrderNumber__c } = record;
+  return records.filter((record) => {
+    const {
+      TchProspectName__c,
+      ProspectMobilePhone__c,
+      OrderNumber__c,
+      VendorName__c,
+    } = record;
     const searchLower = searchValue.toLowerCase();
-    return (TchProspectName__c && TchProspectName__c.toLowerCase().includes(searchLower)) ||
-           (ProspectMobilePhone__c && ProspectMobilePhone__c.toLowerCase().includes(searchLower)) ||
-           (OrderNumber__c && OrderNumber__c.toLowerCase().includes(searchLower));
+    return (
+      (TchProspectName__c &&
+        TchProspectName__c.toLowerCase().includes(searchLower)) ||
+      (ProspectMobilePhone__c &&
+        ProspectMobilePhone__c.toLowerCase().includes(searchLower)) ||
+      (OrderNumber__c && OrderNumber__c.toLowerCase().includes(searchLower)) ||
+      (VendorName__c && VendorName__c.toLowerCase().includes(searchLower))
+    );
   });
 };
+
 
 useEffect(() => {
   const filtered = filterRecords(filter.period, filter.status);
