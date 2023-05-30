@@ -50,7 +50,6 @@ export default function UserReports() {
       <SimpleGrid columns={{ base: 1, md: 1, xl: 1 }} gap="20px" mb="20px">
         <SimpleGrid columns={{ base: 1, md: 2, xl: 2 }} gap="20px"></SimpleGrid>
         <DocumentUploader />
-       <Racco />
         <Tableau />
       </SimpleGrid>
       <SimpleGrid
