@@ -240,42 +240,51 @@ const Tableau = () => {
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
       </Flex>
       <Table variant="simple" overflow={{ base: "auto", md: "auto" }}>
-        <Thead>
-          <Tr>
-            <Th>Détails</Th>
-            <Th
-              onClick={() => toggleSortDirection("CreatedDate")}
-              style={{ cursor: "pointer" }}
-            >
-              Date de la vente
-            </Th>
-            <Th>Nom</Th>
-            <Th
+      <Thead>
+    <Tr>
+      <Th>Détails</Th>
+      <Th
+        onClick={() => toggleSortDirection("CreatedDate")}
+        style={{ cursor: "pointer" }}
+      >
+        Date de la vente
+      </Th>
+      <Th>Nom</Th>
+      <Th>Numéro de téléphone</Th>
+      <Th
   onClick={() => toggleSortDirection("ConnectingDatePlanned__c")}
   style={{ cursor: "pointer" }}
 >
-  Date de raccordement
+  Date de raccordement prévue
 </Th>
+      <Th>Statut</Th>
+    </Tr>
+  </Thead>
 
-            <Th>Statut</Th>
-          </Tr>
-        </Thead>
         <Tbody>
           {sortedRecords
             .slice(offset, offset + PER_PAGE)
             .map((record, index) => (
               <React.Fragment key={record.Id}>
                 <Tr bg={getRowColor(record.Status__c)}>
-                  <Td
-                    onClick={() => handleCollapseToggle(record.Id)}
-                    style={{ cursor: "pointer" }}
+                <Td
+              onClick={() => handleCollapseToggle(record.Id)}
+              style={{ cursor: "pointer" }}
+            >
+              {record.TchPhone__c} <FaAngleDown />
+            </Td>
+            <Td>{record.CreatedDate}</Td>
+            <Td>{record.TchProspectName__c}</Td>
+                <Td>
+                  <a
+                    href="tel:{record.ProspectMobilePhone__c}"
+                    style={{ color: "blue" }}
                   >
-                    {record.TchPhone__c} <FaAngleDown />
-                  </Td>
-                  <Td>{record.CreatedDate}</Td>
-                  <Td>{record.TchProspectName__c}</Td>
-                  <Td>{record.ConnectingDatePlanned__c}</Td>
-                  <Td>{record.Status__c}</Td>
+                    {record.ProspectMobilePhone__c}
+                  </a>
+                </Td>
+            <Td>{record.ConnectingDatePlanned__c}</Td>
+            <Td>{record.Status__c}</Td>
                 </Tr>
                 <Collapse in={collapsedRowId === record.Id}>
                   <Box>

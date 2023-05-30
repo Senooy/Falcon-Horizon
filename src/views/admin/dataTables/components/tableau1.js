@@ -310,6 +310,7 @@ overflow={{ base: "auto", md: "auto" }}>
         Date de la vente
       </Th>
       <Th>Nom</Th>
+      <Th>Numéro de téléphone</Th>
       <Th
   onClick={() => toggleSortDirection("ConnectingDatePlanned__c")}
   style={{ cursor: "pointer" }}
@@ -333,6 +334,14 @@ overflow={{ base: "auto", md: "auto" }}>
             </Td>
             <Td>{record.CreatedDate}</Td>
             <Td>{record.TchProspectName__c}</Td>
+                <Td>
+                  <a
+                    href="tel:{record.ProspectMobilePhone__c}"
+                    style={{ color: "blue" }}
+                  >
+                    {record.ProspectMobilePhone__c}
+                  </a>
+                </Td>
             <Td>{record.ConnectingDatePlanned__c}</Td>
             <Td>{record.Status__c}</Td>
 
@@ -342,15 +351,6 @@ overflow={{ base: "auto", md: "auto" }}>
               <VStack align="start" mt={2} mb={2}>
                 <Text>
                   <strong>Adresse :</strong> {record.TchAddress__c}
-                </Text>
-                <Text>
-                  <strong>Mobile :</strong>{" "}
-                  <a
-                    href="tel:{record.ProspectMobilePhone__c}"
-                    style={{ color: "blue" }}
-                  >
-                    {record.ProspectMobilePhone__c}
-                  </a>
                 </Text>
                 <Text>
                   <strong>Statut du raccordement :</strong>{record.ConnectionStatus__c}
@@ -383,7 +383,7 @@ overflow={{ base: "auto", md: "auto" }}>
                   {record.BasketNumber__c}
                 </Text>
                 <Text>
-                  <strong>Commentaire du call :</strong>{" "}
+                  <strong>Commentaire du technicien :</strong>{" "}
                   {record.Comment__c}
                 </Text>
               </VStack>
