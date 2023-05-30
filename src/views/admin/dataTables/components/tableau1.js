@@ -23,6 +23,7 @@ import "./pagination.css";
 import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
+import { Input } from "@chakra-ui/react";
 
 const PER_PAGE = 100;
 
@@ -45,6 +46,28 @@ const Tableau = () => {
     const colors = getRowColors(status);
     return colorMode === "light" ? colors.light : colors.dark;
   };
+
+  const [searchValue, setSearchValue] = useState('');  // NEW STATE FOR SEARCH VALUE
+
+  const handleSearchChange = (e) => {
+    setSearchValue(e.target.value);
+  };
+
+  const searchRecords = (records) => {
+    return records.filter(record => {
+      const { TchProspectName__c, ProspectMobilePhone__c, OrderNumber__c } = record;
+      const searchLower = searchValue.toLowerCase();
+      return (TchProspectName__c && TchProspectName__c.toLowerCase().includes(searchLower)) ||
+             (ProspectMobilePhone__c && ProspectMobilePhone__c.toLowerCase().includes(searchLower)) ||
+             (OrderNumber__c && OrderNumber__c.toLowerCase().includes(searchLower));
+    });
+  };
+
+  useEffect(() => {
+    const filtered = filterRecords(filter.period, filter.status);
+    const searched = searchRecords(filtered);
+    setFilteredRecords(searched);
+  }, [records, filter, searchValue]);
   
   const now = new Date();
 
@@ -233,6 +256,12 @@ const Tableau = () => {
 
       <div style={{ marginTop: "20px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
+      <Input 
+        placeholder="Recherche..."
+        value={searchValue}
+        onChange={handleSearchChange}
+        mb={4}
+      />
       <Link to="/admin/statistiques">
        <Button
         leftIcon={<MdBarChart />}
