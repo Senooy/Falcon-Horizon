@@ -7,11 +7,13 @@ import {
   MdHome,
   MdLock,
   MdOutlineShoppingCart,
+  MdPower,
 } from 'react-icons/md';
 
 // Admin Imports
 import MainDashboard from 'views/admin/default';
 import Statistiques from 'views/admin/statistiques';
+import Tableau from './views/admin/dataTables/components/racco';
 
 // Auth Imports
 import SignInCentered from 'views/auth/signIn';
@@ -19,11 +21,18 @@ import SignUpCentered from 'views/auth/signUp';
 
 const routes = [
   {
-    name: 'Accueil',
+    name: 'Mes ventes',
     layout: '/admin',
     path: '/default',
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     component: MainDashboard,
+  },
+  {
+    name: 'Mes raccordements',
+    layout: '/admin',
+    path: '/racco',
+    icon: <Icon as={MdPower} width="20px" height="20px" color="inherit" />,
+    component: Tableau,
   },
   {
     name: 'Statistiques',
@@ -31,20 +40,6 @@ const routes = [
     path: '/statistiques',
     icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
     component: Statistiques,
-  },
-  {
-    name: 'Sign In',
-    layout: '/auth',
-    path: '/sign-in',
-    icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
-    component: SignInCentered,
-  },
-  {
-    name: 'Sign Up',
-    layout: '/auth',
-    path: '/sign-up',
-    icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
-    component: SignUpCentered,
   },
 
 ];
