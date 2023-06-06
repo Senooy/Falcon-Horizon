@@ -397,7 +397,7 @@ const sortedRecords = sortRecords(filteredRecords).map((record) => ({
 </ButtonGroup>
 
   <Box mb={4}>
-     <p>Facturation à :</p>
+     <p>Facturation :</p>
   <DatePicker
   selected={selectedDate}  // La date actuellement sélectionnée
   onChange={handleDateChange}  // Le gestionnaire pour changer la date
