@@ -23,6 +23,7 @@ import "./pagination.css";
 import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
+import { Input } from "@chakra-ui/react";
 
 const PER_PAGE = 100;
 
@@ -45,7 +46,32 @@ const Tableau = () => {
     const colors = getRowColors(status);
     return colorMode === "light" ? colors.light : colors.dark;
   };
+
+  const [searchValue, setSearchValue] = useState('');  // NEW STATE FOR SEARCH VALUE
+
+  const handleSearchChange = (e) => {
+    setSearchValue(e.target.value);
+  };
+
+  const searchRecords = (records) => {
+    return records.filter(record => {
+      const { TchProspectName__c, ProspectMobilePhone__c, OrderNumber__c } = record;
+      const searchLower = searchValue.toLowerCase();
+      return (TchProspectName__c && TchProspectName__c.toLowerCase().includes(searchLower)) ||
+             (ProspectMobilePhone__c && ProspectMobilePhone__c.toLowerCase().includes(searchLower)) ||
+             (OrderNumber__c && OrderNumber__c.toLowerCase().includes(searchLower));
+    });
+  };
+
+  useEffect(() => {
+    const filtered = filterRecords(filter.period, filter.status);
+    const searched = searchRecords(filtered);
+    setFilteredRecords(searched);
+  }, [records, filter, searchValue]);
   
+  const now = new Date();
+
+  const oneDay = 24 * 60 * 60 * 1000;
 
   const fetchData = async () => {
     try {
@@ -114,11 +140,11 @@ const Tableau = () => {
   ];
   
 
-  const filterRecords = (period, status) => {
+  const filterRecords = (period, status, hasConnectingDate) => {
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
   
-    const filteredByPeriod = records.filter((record) => {
+    let filteredByPeriod = records.filter((record) => {
       const recordDate = new Date(record.CreatedDate);
       const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
   
@@ -134,21 +160,37 @@ const Tableau = () => {
       }
     });
   
-    const filteredByStatus =
-    status === "Tous"
-      ? filteredByPeriod
-      : filteredByPeriod.filter((record) => record.Status__c === status || record.ConnectionStatus__c === status); // Modifiez cette ligne pour inclure le statut EnCoursDeRattrapage
-
+    let filteredByStatus =
+      status === "Tous"
+        ? filteredByPeriod
+        : filteredByPeriod.filter(
+            (record) =>
+              record.Status__c === status || record.ConnectionStatus__c === status
+          ); 
+  
+    if (hasConnectingDate) {
+      filteredByStatus = filteredByStatus.filter(
+        (record) => {
+          if(record.ConnectingDatePlanned__c && record.ConnectingDatePlanned__c.length > 0) {
+            const connectingDate = new Date(record.ConnectingDatePlanned__c);
+            const diffDaysConnecting = Math.round(Math.abs((now - connectingDate) / oneDay));
+            return diffDaysConnecting >= -1 && diffDaysConnecting <= 1;
+          }
+          return false;
+        }
+      );
+    }
+  
     return filteredByStatus;
   };
+  
 
 
-  const handleFilter = (period, status) => {
-    const filtered = filterRecords(period, status);
+  const handleFilter = (period, status, hasConnectingDate) => {
+    const filtered = filterRecords(period, status, hasConnectingDate);
     setFilteredRecords(filtered);
     setFilter({ period, status });
   };
-  
   
 
   useEffect(() => {
@@ -212,8 +254,14 @@ const Tableau = () => {
     >
   
 
-      <div style={{ marginTop: "60px" }}></div>
+      <div style={{ marginTop: "20px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
+      <Input 
+        placeholder="Recherche..."
+        value={searchValue}
+        onChange={handleSearchChange}
+        mb={4}
+      />
       <Link to="/admin/statistiques">
        <Button
         leftIcon={<MdBarChart />}
@@ -223,6 +271,7 @@ const Tableau = () => {
        >
       Statistiques
       </Button>
+
   </Link>
   <Box mb={4}>
 
@@ -272,6 +321,9 @@ const Tableau = () => {
 
     </Box>
 
+    <Box mb={2}>
+    </Box>
+
 </Flex>
 
   
@@ -287,7 +339,13 @@ overflow={{ base: "auto", md: "auto" }}>
         Date de la vente
       </Th>
       <Th>Nom</Th>
-      <Th>Date de raccordement</Th>
+      <Th>Numéro de téléphone</Th>
+      <Th
+  onClick={() => toggleSortDirection("ConnectingDatePlanned__c")}
+  style={{ cursor: "pointer" }}
+>
+  Date de raccordement prévue
+</Th>
       <Th>Statut</Th>
     </Tr>
   </Thead>
@@ -305,6 +363,14 @@ overflow={{ base: "auto", md: "auto" }}>
             </Td>
             <Td>{record.CreatedDate}</Td>
             <Td>{record.TchProspectName__c}</Td>
+                <Td>
+                <a
+  href={`tel:${record.ProspectMobilePhone__c}`}
+  style={{ color: "blue" }}
+>
+  {record.ProspectMobilePhone__c}
+</a>
+                </Td>
             <Td>{record.ConnectingDatePlanned__c}</Td>
             <Td>{record.Status__c}</Td>
 
@@ -314,15 +380,6 @@ overflow={{ base: "auto", md: "auto" }}>
               <VStack align="start" mt={2} mb={2}>
                 <Text>
                   <strong>Adresse :</strong> {record.TchAddress__c}
-                </Text>
-                <Text>
-                  <strong>Mobile :</strong>{" "}
-                  <a
-  href={`tel:${record.ProspectMobilePhone__c}`}
-  style={{ color: "blue" }}
->
-  {record.ProspectMobilePhone__c}
-</a>
                 </Text>
                 <Text>
                   <strong>Statut du raccordement :</strong>{record.ConnectionStatus__c}
@@ -355,7 +412,7 @@ overflow={{ base: "auto", md: "auto" }}>
                   {record.BasketNumber__c}
                 </Text>
                 <Text>
-                  <strong>Commentaire du call :</strong>{" "}
+                  <strong>Commentaire du technicien :</strong>{" "}
                   {record.Comment__c}
                 </Text>
               </VStack>
