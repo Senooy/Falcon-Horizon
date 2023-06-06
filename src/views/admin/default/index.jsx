@@ -34,8 +34,6 @@ import {
 import React, { useEffect } from "react";
 import AdminTableau from "./components/userInfo";
 import Tableau from "../dataTables/components/tableau1";
-import Racco from "../dataTables/components/racco";
-import DocumentUploader from "../dataTables/components/uploadadmin";
 
 
 export default function UserReports() {
@@ -49,7 +47,6 @@ export default function UserReports() {
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
       <SimpleGrid columns={{ base: 1, md: 1, xl: 1 }} gap="20px" mb="20px">
         <SimpleGrid columns={{ base: 1, md: 2, xl: 2 }} gap="20px"></SimpleGrid>
-       <Racco />
         <Tableau />
       </SimpleGrid>
       <SimpleGrid
