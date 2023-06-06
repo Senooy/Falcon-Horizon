@@ -27,11 +27,14 @@ import { Input } from "@chakra-ui/react";
 import { Select } from "@chakra-ui/react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import './i18n.js'
+import { useTranslation } from 'react-i18next';
 
 const PER_PAGE = 100;
 
 const Tableau = () => {
   const { colorMode } = useColorMode();
+  const { t } = useTranslation(); // Utilisation de la fonction t() pour traduire les termes
   const { user } = React.useContext(AuthContext);
   const shouldHideTable = user && user.profileData && user.profileData.admin;
 
@@ -388,7 +391,7 @@ const sortedRecords = sortRecords(filteredRecords).map((record) => ({
       onClick={() => handleFilter(filter.period, status)}
       px={10}
     >
-      {status}
+       {t(status)}
     </Button>
     
     
@@ -396,7 +399,9 @@ const sortedRecords = sortRecords(filteredRecords).map((record) => ({
 
 </ButtonGroup>
 
-  <Box mb={4}>
+  <Box mb={4}
+  spacing={20}
+  >
      <p>Facturation :</p>
   <DatePicker
   selected={selectedDate}  // La date actuellement sélectionnée
@@ -456,7 +461,7 @@ overflow={{ base: "auto", md: "auto" }}>
                 </a>
                 </Td>
             <Td>{record.ConnectingDatePlanned__c}</Td>
-            <Td>{record.Status__c}</Td>
+            <Td>{t(record.Status__c)}</Td>
 
           </Tr>
           <Collapse in={collapsedRowId === record.Id}>
