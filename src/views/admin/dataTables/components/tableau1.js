@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   useColorMode,
@@ -15,18 +15,18 @@ import {
   ButtonGroup,
   Button,
   Flex,
-} from "@chakra-ui/react";
-import axios from "axios";
-import { AuthContext } from "contexts/AuthContext";
-import ReactPaginate from "react-paginate";
-import "./pagination.css";
-import { FaAngleDown } from "react-icons/fa";
-import { MdBarChart } from "react-icons/md";
-import { Link } from "react-router-dom";
-import { Input } from "@chakra-ui/react";
-import { Select } from "@chakra-ui/react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+} from '@chakra-ui/react';
+import axios from 'axios';
+import { AuthContext } from 'contexts/AuthContext';
+import ReactPaginate from 'react-paginate';
+import './pagination.css';
+import { FaAngleDown } from 'react-icons/fa';
+import { MdBarChart } from 'react-icons/md';
+import { Link } from 'react-router-dom';
+import { Input } from '@chakra-ui/react';
+import { Select } from '@chakra-ui/react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import './i18n.js'
 import { useTranslation } from 'react-i18next';
 
@@ -38,26 +38,27 @@ const Tableau = () => {
   const { user } = React.useContext(AuthContext);
   const shouldHideTable = user && user.profileData && user.profileData.admin;
 
-  const periods = ["Semaine", "Mois", "Année"];
+  const periods = ['Semaine', 'Mois', 'Année'];
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [sortConfig, setSortConfig] = useState({
-    key: "CreatedDate",
+    key: 'CreatedDate',
     ascending: false,
   });
   const [collapsedRowId, setCollapsedRowId] = useState(null);
-  const [filter, setFilter] = useState({ period: "Tous", status: "Tous" });
+  const [filter, setFilter] = useState({ period: 'Tous', status: 'Tous' });
   const getRowColor = (status) => {
     const colors = getRowColors(status);
-    return colorMode === "light" ? colors.light : colors.dark;
+    return colorMode === 'light' ? colors.light : colors.dark;
   };
 
   const [searchValue, setSearchValue] = useState('');  // NEW STATE FOR SEARCH VALUE
 
-  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState('');
 
   const [selectedDate, setSelectedDate] = useState(null);
+
 
 
 
