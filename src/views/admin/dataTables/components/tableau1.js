@@ -318,11 +318,11 @@ overflow={{ base: "auto", md: "auto" }}>
                 <Text>
                   <strong>Mobile :</strong>{" "}
                   <a
-                    href="tel:{record.ProspectMobilePhone__c}"
-                    style={{ color: "blue" }}
-                  >
-                    {record.ProspectMobilePhone__c}
-                  </a>
+  href={`tel:${record.ProspectMobilePhone__c}`}
+  style={{ color: "blue" }}
+>
+  {record.ProspectMobilePhone__c}
+</a>
                 </Text>
                 <Text>
                   <strong>Statut du raccordement :</strong>{record.ConnectionStatus__c}
