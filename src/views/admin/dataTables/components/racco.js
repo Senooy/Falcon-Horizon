@@ -49,8 +49,14 @@ const Tableau = () => {
   };
 
   const now = new Date();
-  const oneDay = 24 * 60 * 60 * 1000;
-  
+
+
+const oneDay = 24 * 60 * 60 * 1000;
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+
 
   const fetchData = async () => {
     try {
@@ -143,22 +149,24 @@ const Tableau = () => {
               record.Status__c === status || record.ConnectionStatus__c === status
           );
 
-    if (hasConnectingDate) {
-      filteredByStatus = filteredByStatus.filter((record) => {
-        if (
-          record.ConnectingDatePlanned__c &&
-          record.ConnectingDatePlanned__c.length > 0
-        ) {
-          const connectingDate = new Date(record.ConnectingDatePlanned__c);
-          const diffDaysConnecting = Math.round(
-            Math.abs((now - connectingDate) / oneDay)
-          );
-          return (
-            diffDaysConnecting >= -1 && diffDaysConnecting <= 1
-          );
-        }
-        return false;
-      });
+if (hasConnectingDate) {
+  filteredByStatus = filteredByStatus.filter((record) => {
+    if (
+      record.ConnectingDatePlanned__c &&
+      record.ConnectingDatePlanned__c.length > 0
+    ) {
+      const connectingDate = new Date(record.ConnectingDatePlanned__c);
+      const isTodayOrTomorrowOrYesterday =
+        connectingDate.toDateString() === now.toDateString() ||
+        connectingDate.toDateString() === tomorrow.toDateString() ||
+        connectingDate.toDateString() === yesterday.toDateString();
+      return isTodayOrTomorrowOrYesterday;
+    }
+    return false;
+  });
+
+
+      
     }
 
     return filteredByStatus;
@@ -183,15 +191,14 @@ const Tableau = () => {
   const pageCount = Math.ceil(filteredRecords.length / PER_PAGE);
 
   const sortedRecords = sortRecords(filteredRecords)
-    .filter((record) => {
-      const connectingDate = new Date(record.ConnectingDatePlanned__c);
-      const diffDaysConnecting = Math.round(
-        Math.abs((now - connectingDate) / oneDay)
-      );
-      return (
-        diffDaysConnecting >= -1 && diffDaysConnecting <= 1
-      );
-    })
+  .filter((record) => {
+    const connectingDate = new Date(record.ConnectingDatePlanned__c);
+    const isTodayOrTomorrowOrYesterday =
+      connectingDate.toDateString() === now.toDateString() ||
+      connectingDate.toDateString() === tomorrow.toDateString() ||
+      connectingDate.toDateString() === yesterday.toDateString();
+    return isTodayOrTomorrowOrYesterday;
+  })
     .map((record) => ({
       ...record,
       CreatedDate: formatDate(record.CreatedDate),
