@@ -80,18 +80,18 @@ export const ContextProvider = (props) => {
 
   const createUserDocument = async (user, additionalData) => {
     const { email } = user;
-    const { salesCode } = additionalData; // Ne prend pas en compte "isAdmin"
-
+    const { salesCode, isAdmin } = additionalData; // Ajout de "isAdmin" dans les données supplémentaires
     try {
-      await addDoc(collection(db, "users"), {
-        salesCode,
-        email,
-        createdAt: new Date(),
-      });
+    await addDoc(collection(db, "users"), {
+    salesCode,
+    email,
+    createdAt: new Date(),
+    admin: isAdmin // Ajout du champ "admin" avec la valeur de "isAdmin"
+    });
     } catch (error) {
-      console.log("error", error);
+    console.log("error", error);
     }
-  };
+    };
 
   const getUserData = async (user) => {
     try {

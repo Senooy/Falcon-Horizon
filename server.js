@@ -2,7 +2,6 @@ const express = require("express");
 const axios = require("axios");
 const qs = require("qs");
 const cors = require("cors")
-const multer = require("multer");
 const { spawn } = require('child_process');
 
 // API Salesforce
@@ -41,30 +40,6 @@ app.get("/api/salesforce_data", async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Une erreur est survenue lors de la récupération des données." });
   }
-});
-
-// Configuring Multer for file upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Set the destination folder where files will be saved
-    cb(null, "./uploads");
-  },
-  filename: (req, file, cb) => {
-    // Set the filename to the original file name
-    cb(null, file.originalname);
-  },
-});
-
-const upload = multer({ storage });
-
-app.post("/upload", upload.array("files"), (req, res) => {
-  // Handle the uploaded files
-  console.log(req.body); // Contains the seller information
-  console.log(req.files); // Contains the uploaded files
-
-  // You can perform additional processing or save the files to the desired location on your VPS
-  
-  res.json({ message: "Files uploaded successfully." });
 });
 
 const PORT = process.env.PORT || 3001;
