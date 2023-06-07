@@ -244,7 +244,7 @@ const Tableau = () => {
           colorScheme={filter.period === period ? "brand" : "gray"}
           onClick={() => handleFilter(period, filter.status)}
         >
-          {period}
+          {period} 
         </Button>
       ))}
     </ButtonGroup>
