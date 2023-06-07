@@ -45,6 +45,11 @@ const Tableau = () => {
     const colors = getRowColors(status);
     return colorMode === "light" ? colors.light : colors.dark;
   };
+
+
+  const now = new Date();
+
+  const oneDay = 24 * 60 * 60 * 1000;
   
 
   const fetchData = async () => {
@@ -142,12 +147,18 @@ const filterRecords = (period, status, hasConnectingDate) => {
             record.Status__c === status || record.ConnectionStatus__c === status
         ); // Modifiez cette ligne pour inclure le statut EnCoursDeRattrapage
 
-  if (hasConnectingDate) {
-    filteredByStatus = filteredByStatus.filter(
-      (record) => record.ConnectingDatePlanned__c && record.ConnectingDatePlanned__c.length > 0
-    );
-  }
-
+        if (hasConnectingDate) {
+          filteredByStatus = filteredByStatus.filter(
+            (record) => {
+              if(record.ConnectingDatePlanned__c && record.ConnectingDatePlanned__c.length > 0) {
+                const connectingDate = new Date(record.ConnectingDatePlanned__c);
+                const diffDaysConnecting = Math.round(Math.abs((now - connectingDate) / oneDay));
+                return diffDaysConnecting >= -1 && diffDaysConnecting <= 1;
+              }
+              return false;
+            }
+          );
+        }
     return filteredByStatus;
   };
 
@@ -221,7 +232,7 @@ const filterRecords = (period, status, hasConnectingDate) => {
     >
   
 
-      <div style={{ marginTop: "60px" }}></div>
+  <div style={{ marginTop: "20px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
       <Link to="/admin/statistiques">
        <Button
@@ -234,18 +245,6 @@ const filterRecords = (period, status, hasConnectingDate) => {
       </Button>
   </Link>
   <Box mb={4}>
-
-  <Box mb={4}>
-    <Button
-  size="md"
-  colorScheme="blue"
-  onClick={() => handleFilter(filter.period, filter.status, true)}
-  px={10}
->
-  Avec Date de raccordement
-</Button>
-
-    </Box>
 
     <ButtonGroup isAttached>
       <Button
@@ -306,7 +305,12 @@ overflow={{ base: "auto", md: "auto" }}>
         Date de la vente
       </Th>
       <Th>Nom</Th>
-      <Th>Date de raccordement</Th>
+      <Th
+  onClick={() => toggleSortDirection("ConnectingDatePlanned__c")}
+  style={{ cursor: "pointer" }}
+>
+  Date de raccordement prévue
+</Th>
       <Th>Statut</Th>
     </Tr>
   </Thead>
