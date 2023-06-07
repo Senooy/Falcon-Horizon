@@ -25,6 +25,7 @@ import "views/admin/dataTables/components/pagination.css";
 import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
+import { Input } from "@chakra-ui/react";
 
 const PER_PAGE = 10;
 
@@ -55,6 +56,39 @@ const Tableau = () => {
     const colors = getRowColors(status);
     return colorMode === "light" ? colors.light : colors.dark;
   };
+
+  const [searchValue, setSearchValue] = useState('');  // NEW STATE FOR SEARCH VALUE
+
+const handleSearchChange = (e) => {
+  setSearchValue(e.target.value);
+};
+
+const searchRecords = (records) => {
+  return records.filter((record) => {
+    const {
+      TchProspectName__c,
+      ProspectMobilePhone__c,
+      OrderNumber__c,
+      VendorName__c,
+    } = record;
+    const searchLower = searchValue.toLowerCase();
+    return (
+      (TchProspectName__c &&
+        TchProspectName__c.toLowerCase().includes(searchLower)) ||
+      (ProspectMobilePhone__c &&
+        ProspectMobilePhone__c.toLowerCase().includes(searchLower)) ||
+      (OrderNumber__c && OrderNumber__c.toLowerCase().includes(searchLower)) ||
+      (VendorName__c && VendorName__c.toLowerCase().includes(searchLower))
+    );
+  });
+};
+
+
+useEffect(() => {
+  const filtered = filterRecords(filter.period, filter.status);
+  const searched = searchRecords(filtered);
+  setFilteredRecords(searched);
+}, [records, filter, searchValue]);
 
   const refreshJsonData = async () => {
     try {
@@ -243,16 +277,12 @@ const Tableau = () => {
 
       <div style={{ marginTop: "60px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
-      <IconButton
-       onClick={refreshJsonData}
-       colorScheme="blue"
-       aria-label="Actualiser"
-       icon={<FaRedo />}
-       size="sm" // Adjust the size using Chakra UI's predefined sizes, e.g., 'sm', 'md', or 'lg'
-       width="32px" // Customize the width using a specific value
-       height="32px" // Customize the height using a specific value
-       mb={4}
-       />
+      <Input 
+  placeholder="Recherche..."
+  value={searchValue}
+  onChange={handleSearchChange}
+  mb={4}
+/>
       <Link to="/admin/statistiques">
        <Button
         leftIcon={<MdBarChart />}
@@ -362,8 +392,8 @@ overflow={{ base: "auto", md: "auto" }}>
             >
               {record.TchPhone__c} <FaAngleDown />
             </Td>
-            <Td>{record.CreatedDate}</Td>
             <Td>{record.VendorName__c}</Td>
+            <Td>{record.CreatedDate}</Td>
             <Td>{record.TchProspectName__c}</Td>
             <Td>{record.ConnectingDatePlanned__c}</Td>
             <Td>{record.Status__c}</Td>
