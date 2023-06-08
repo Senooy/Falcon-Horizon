@@ -46,6 +46,7 @@ export default function UserReports() {
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }} mt="20px">
       <SimpleGrid columns={{ base: 1, md: 1, xl: 1 }} gap="20px" mb="120px">
         <SimpleGrid columns={{ base: 1, md: 2, xl: 2 }} gap="20px">
+          <Tableau />
         </SimpleGrid>
       </SimpleGrid>
       <SimpleGrid columns={{ base: 1, md: 1, xl: 1 }} gap="20px" mb="20px"></SimpleGrid>
