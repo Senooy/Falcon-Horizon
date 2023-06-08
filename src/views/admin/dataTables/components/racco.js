@@ -18,8 +18,11 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
+import ReactPaginate from "react-paginate";
 import "./pagination.css";
 import { FaAngleDown } from "react-icons/fa";
+import { MdBarChart } from "react-icons/md";
+import { Link } from "react-router-dom";
 import { Heading } from "@chakra-ui/react";
 
 const PER_PAGE = 100;

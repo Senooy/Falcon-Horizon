@@ -13,7 +13,7 @@ import {
 // Admin Imports
 import MainDashboard from 'views/admin/default';
 import Statistiques from 'views/admin/statistiques';
-import Tableau from './views/admin/racco/components/racco';
+import Tableau from './views/admin/dataTables/components/racco';
 
 // Auth Imports
 import SignInCentered from 'views/auth/signIn';
