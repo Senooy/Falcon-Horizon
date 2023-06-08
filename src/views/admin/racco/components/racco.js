@@ -18,11 +18,8 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
-import ReactPaginate from "react-paginate";
 import "./pagination.css";
 import { FaAngleDown } from "react-icons/fa";
-import { MdBarChart } from "react-icons/md";
-import { Link } from "react-router-dom";
 import { Heading } from "@chakra-ui/react";
 
 const PER_PAGE = 100;
@@ -50,7 +47,7 @@ const Tableau = () => {
 
   const now = new Date();
   const oneDay = 24 * 60 * 60 * 1000;
-  
+
 
   const fetchData = async () => {
     try {
@@ -228,7 +225,6 @@ const Tableau = () => {
       bg={bgColor}
       borderRadius="5px"
       boxShadow="0 0 5px 1px rgba(0, 0, 0, 0.1)"
-      marginTop={100}
       p="10px"
       overflow="auto"
       maxH="600px"
@@ -236,8 +232,8 @@ const Tableau = () => {
       minH="400px"
       minW="300px"
     >
-      <div style={{ marginTop: "10px" }}></div>
-      <Heading as="h2" size="lg" mb={5}>Mes raccordements à venir</Heading>
+      <div style={{ marginTop: "20px" }}></div>
+      <Heading as="h2" size="lg" mb={5}>Vos raccordements à venir</Heading>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
       </Flex>
       <Table variant="simple" overflow={{ base: "auto", md: "auto" }}>
@@ -253,30 +249,30 @@ const Tableau = () => {
       <Th>Nom</Th>
       <Th>Numéro de téléphone</Th>
       <Th
-  onClick={() => toggleSortDirection("ConnectingDatePlanned__c")}
-  style={{ cursor: "pointer" }}
->
-  Date de raccordement prévue
-</Th>
-      <Th>Statut</Th>
-    </Tr>
-  </Thead>
+        onClick={() => toggleSortDirection("ConnectingDatePlanned__c")}
+        style={{ cursor: "pointer" }}
+       >
+          Date de raccordement
+      </Th>
 
+            <Th>Statut</Th>
+          </Tr>
+        </Thead>
         <Tbody>
           {sortedRecords
             .slice(offset, offset + PER_PAGE)
             .map((record, index) => (
               <React.Fragment key={record.Id}>
                 <Tr bg={getRowColor(record.Status__c)}>
-                <Td
+                  <Td
               onClick={() => handleCollapseToggle(record.Id)}
               style={{ cursor: "pointer" }}
             >
               {record.TchPhone__c} <FaAngleDown />
-            </Td>
-            <Td>{record.CreatedDate}</Td>
-            <Td>{record.TchProspectName__c}</Td>
-                <Td>
+                 </Td>
+                  <Td>{record.CreatedDate}</Td>
+                  <Td>{record.TchProspectName__c}</Td>
+                  <Td>
                   <a
                     href="tel:{record.ProspectMobilePhone__c}"
                     style={{ color: "blue" }}
