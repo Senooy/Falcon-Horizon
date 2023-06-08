@@ -24,6 +24,9 @@ import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { Input } from "@chakra-ui/react";
+import { Select } from "@chakra-ui/react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const PER_PAGE = 100;
 
@@ -47,16 +50,31 @@ const Tableau = () => {
     return colorMode === "light" ? colors.light : colors.dark;
   };
 
-
-  const now = new Date();
-
-  const oneDay = 24 * 60 * 60 * 1000;
-
   const [searchValue, setSearchValue] = useState('');  // NEW STATE FOR SEARCH VALUE
+
+  const [selectedMonth, setSelectedMonth] = useState("");
+
+  const [selectedDate, setSelectedDate] = useState(null);
+
+
+
 
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
+
+  const handleMonthChange = (event) => {
+    setSelectedMonth(event.target.value);
+    const filtered = filterRecords(filter.period, filter.status, filter.hasConnectingDate);
+    setFilteredRecords(filtered);
+  };
+  
+  const handleDateChange = (date) => {
+    setSelectedDate(date);  // Définir la date sélectionnée
+    const filtered = filterRecords(filter.period, filter.status, filter.hasConnectingDate);
+    setFilteredRecords(filtered);
+  };
+  
 
   const searchRecords = (records) => {
     return records.filter(record => {
@@ -72,8 +90,12 @@ const Tableau = () => {
     const filtered = filterRecords(filter.period, filter.status);
     const searched = searchRecords(filtered);
     setFilteredRecords(searched);
-  }, [records, filter, searchValue]);
+  }, [records, filter, searchValue, selectedMonth, selectedDate]);
+
   
+  const now = new Date();
+
+  const oneDay = 24 * 60 * 60 * 1000;
 
   const fetchData = async () => {
     try {
@@ -82,24 +104,37 @@ const Tableau = () => {
           `${user.profileData.salesCode}`
       );
       setRecords(data.records);
-      setFilteredRecords(data.records);
+      const filtered = filterRecords(filter.period, filter.status, filter.hasConnectingDate);
+      setFilteredRecords(filtered);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const formatDate = (date) => {
+  const formatDate = (date, isPaymentDate = false) => {
     if (!date) {
       return "";
     }
     const d = new Date(date);
+    let month = d.getMonth() + 1;
+    let year = d.getFullYear();
+  
+    if (isPaymentDate) {
+      month += 1;
+      if (month > 12) {
+        month = 1; // reset to January
+        year++; // increment year
+      }
+    }
+  
     return isNaN(d.getTime())
       ? ""
-      : `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1)
+      : `${d.getDate().toString().padStart(2, "0")}/${month
           .toString()
-          .padStart(2, "0")}/${d.getFullYear()}`;
+          .padStart(2, "0")}/${year}`;
   };
 
+  
   const sortRecords = (records) => {
     return records.sort((a, b) => {
       const dateA = new Date(a[sortConfig.key]);
@@ -142,7 +177,7 @@ const Tableau = () => {
   ];
   
 
-const filterRecords = (period, status, hasConnectingDate) => {
+  const filterRecords = (period, status, hasConnectingDate) => {
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
   
@@ -163,36 +198,70 @@ const filterRecords = (period, status, hasConnectingDate) => {
     });
   
     let filteredByStatus =
-    status === "Tous"
-      ? filteredByPeriod
-      : filteredByPeriod.filter(
-          (record) =>
-            record.Status__c === status || record.ConnectionStatus__c === status
-        ); // Modifiez cette ligne pour inclure le statut EnCoursDeRattrapage
-
-        if (hasConnectingDate) {
-          filteredByStatus = filteredByStatus.filter(
-            (record) => {
-              if(record.ConnectingDatePlanned__c && record.ConnectingDatePlanned__c.length > 0) {
-                const connectingDate = new Date(record.ConnectingDatePlanned__c);
-                const diffDaysConnecting = Math.round(Math.abs((now - connectingDate) / oneDay));
-                return diffDaysConnecting >= -1 && diffDaysConnecting <= 1;
-              }
-              return false;
-            }
+      status === "Tous"
+        ? filteredByPeriod
+        : filteredByPeriod.filter(
+            (record) =>
+              record.Status__c === status || record.ConnectionStatus__c === status
           );
+  
+    if (hasConnectingDate) {
+      filteredByStatus = filteredByStatus.filter((record) => {
+        if (
+          record.ConnectingDatePlanned__c &&
+          record.ConnectingDatePlanned__c.length > 0
+        ) {
+          const connectingDate = new Date(record.ConnectingDatePlanned__c);
+          const diffDaysConnecting = Math.round(
+            Math.abs((now - connectingDate) / oneDay)
+          );
+          return diffDaysConnecting >= -1 && diffDaysConnecting <= 1;
         }
+        return false;
+      });
+    }
+  
+    if (selectedMonth) {
+      filteredByStatus = filteredByStatus.filter((record) => {
+        if (record.DateOfPayment__c) {
+          const paymentMonth = new Date(record.DateOfPayment__c).getMonth() + 1;
+          return parseInt(selectedMonth) === paymentMonth;
+        }
+        return false;
+      });
+    }
+
+    if (selectedDate) {
+      const selectedMonth = selectedDate.getMonth();
+      const selectedYear = selectedDate.getFullYear();
+      
+      filteredByStatus = filteredByStatus.filter((record) => {
+        if (record.DateOfPayment__c) {
+          const paymentDate = new Date(record.DateOfPayment__c);
+          const paymentMonth = paymentDate.getMonth();
+          const paymentYear = paymentDate.getFullYear();
+      
+          // Check if payment year and month matches the selected year and month - 1
+          const isSameYear = selectedYear === paymentYear;
+          const isPreviousMonth = (selectedMonth === 0 && paymentMonth === 11 && !isSameYear) 
+                                || (selectedMonth === paymentMonth + 1 && isSameYear);
+    
+          return isPreviousMonth;
+        }
+        return false;
+      });
+    }
+    
+  
     return filteredByStatus;
   };
-
+  
 
   const handleFilter = (period, status, hasConnectingDate) => {
     const filtered = filterRecords(period, status, hasConnectingDate);
     setFilteredRecords(filtered);
     setFilter({ period, status });
   };
-  
-  
 
   useEffect(() => {
   fetchData();
@@ -206,11 +275,15 @@ const filterRecords = (period, status, hasConnectingDate) => {
   
   const pageCount = Math.ceil(filteredRecords.length / PER_PAGE);
   
-  const sortedRecords = sortRecords(filteredRecords).map((record) => ({
+// ...
+const sortedRecords = sortRecords(filteredRecords).map((record) => ({
   ...record,
   CreatedDate: formatDate(record.CreatedDate),
   ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
-  }));
+  DateOfPayment__c: formatDate(record.DateOfPayment__c, true), // ici on passe true pour ajouter un mois
+}));
+// ...
+
 
   const bgColor = useColorModeValue("white", "gray.700");
 
@@ -255,7 +328,7 @@ const filterRecords = (period, status, hasConnectingDate) => {
     >
   
 
-  <div style={{ marginTop: "20px" }}></div>
+      <div style={{ marginTop: "20px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
       <Input 
         placeholder="Recherche..."
@@ -272,8 +345,11 @@ const filterRecords = (period, status, hasConnectingDate) => {
        >
       Statistiques
       </Button>
+
   </Link>
   <Box mb={4}>
+
+  
 
     <ButtonGroup isAttached>
       <Button
@@ -291,7 +367,7 @@ const filterRecords = (period, status, hasConnectingDate) => {
           colorScheme={filter.period === period ? "brand" : "gray"}
           onClick={() => handleFilter(period, filter.status)}
         >
-          {period} 
+          {period}
         </Button>
       ))}
     </ButtonGroup>
@@ -314,9 +390,22 @@ const filterRecords = (period, status, hasConnectingDate) => {
     >
       {status}
     </Button>
+    
+    
   ))}
+
 </ButtonGroup>
 
+  <Box mb={4}>
+     <p>Facturation à :</p>
+  <DatePicker
+  selected={selectedDate}  // La date actuellement sélectionnée
+  onChange={handleDateChange}  // Le gestionnaire pour changer la date
+  dateFormat="MM/yyyy"  // Le format de la date
+  showMonthYearPicker  // Pour afficher le sélecteur de mois/année
+  placeholderText="Choisir une date"  // Le texte affiché lorsque rien n'est sélectionné
+/>
+  </Box>
     </Box>
 
 </Flex>
@@ -325,6 +414,7 @@ const filterRecords = (period, status, hasConnectingDate) => {
 <Table variant="simple"
 overflow={{ base: "auto", md: "auto" }}>
   <Thead>
+    
     <Tr>
       <Th>Détails</Th>
       <Th
@@ -334,6 +424,7 @@ overflow={{ base: "auto", md: "auto" }}>
         Date de la vente
       </Th>
       <Th>Nom</Th>
+      <Th>Numéro de téléphone</Th>
       <Th
   onClick={() => toggleSortDirection("ConnectingDatePlanned__c")}
   style={{ cursor: "pointer" }}
@@ -357,6 +448,13 @@ overflow={{ base: "auto", md: "auto" }}>
             </Td>
             <Td>{record.CreatedDate}</Td>
             <Td>{record.TchProspectName__c}</Td>
+                <Td>
+                <a
+                href={`tel:${record.ProspectMobilePhone__c}`}
+                style={{ color: "blue" }}>
+                   {record.ProspectMobilePhone__c}
+                </a>
+                </Td>
             <Td>{record.ConnectingDatePlanned__c}</Td>
             <Td>{record.Status__c}</Td>
 
@@ -366,15 +464,6 @@ overflow={{ base: "auto", md: "auto" }}>
               <VStack align="start" mt={2} mb={2}>
                 <Text>
                   <strong>Adresse :</strong> {record.TchAddress__c}
-                </Text>
-                <Text>
-                  <strong>Mobile :</strong>{" "}
-                  <a
-                    href="tel:{record.ProspectMobilePhone__c}"
-                    style={{ color: "blue" }}
-                  >
-                    {record.ProspectMobilePhone__c}
-                  </a>
                 </Text>
                 <Text>
                   <strong>Statut du raccordement :</strong>{record.ConnectionStatus__c}
@@ -407,7 +496,7 @@ overflow={{ base: "auto", md: "auto" }}>
                   {record.BasketNumber__c}
                 </Text>
                 <Text>
-                  <strong>Commentaire du call :</strong>{" "}
+                  <strong>Commentaire du technicien :</strong>{" "}
                   {record.Comment__c}
                 </Text>
               </VStack>
