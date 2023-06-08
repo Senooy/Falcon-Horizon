@@ -445,7 +445,7 @@ overflow={{ base: "auto", md: "auto" }}>
                   {record.BasketNumber__c}
                 </Text>
                 <Text>
-                  <strong>Commentaire du call :</strong>{" "}
+                  <strong>Commentaire du technicien :</strong>{" "}
                   {record.Comment__c}
                 </Text>
               </VStack>
