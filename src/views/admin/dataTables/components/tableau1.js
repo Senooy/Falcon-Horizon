@@ -334,11 +334,14 @@ const sortedRecords = sortRecords(filteredRecords).map((record) => ({
       <div style={{ marginTop: "20px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
       <Input 
-        placeholder="Recherche..."
-        value={searchValue}
-        onChange={handleSearchChange}
-        mb={4}
-      />
+  placeholder="Recherche..."
+  value={searchValue}
+  onChange={handleSearchChange}
+  mb={4}
+  bg={colorMode === "dark" ? "gray.800" : "gray.100"} // Champs sombres en mode sombre
+  color={colorMode === "dark" ? "white" : "black"} // Texte blanc en mode sombre
+/>
+
       <Link to="/admin/statistiques">
        <Button
         leftIcon={<MdBarChart />}
