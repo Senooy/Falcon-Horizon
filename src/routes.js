@@ -12,7 +12,7 @@ import {
 
 // Admin Imports
 import MainDashboard from 'views/admin/default';
-import Racco from 'views/admin/dataTables/components/racco'
+import Racco from 'views/admin/racco';
 import Statistiques from 'views/admin/statistiques';
 
 // Auth Imports
