@@ -7,12 +7,10 @@ import {
   MdHome,
   MdLock,
   MdOutlineShoppingCart,
-  MdAssignment,
 } from 'react-icons/md';
 
 // Admin Imports
 import MainDashboard from 'views/admin/default';
-import Racco from 'views/admin/racco';
 import Statistiques from 'views/admin/statistiques';
 
 // Auth Imports
@@ -37,9 +35,9 @@ const routes = [
   {
     name: 'Mes raccordements',
     layout: '/admin',
-    path: '/racco',
-    icon: <Icon as={MdAssignment} width="20px" height="20px" color="inherit" />,
-    component: Racco,
+    path: '/sign-in',
+    icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
+    component: SignInCentered,
   },
   {
     name: 'Sign Up',
