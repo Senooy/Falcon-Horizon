@@ -18,16 +18,13 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
-import ReactPaginate from "react-paginate";
 import "./pagination.css";
 import { FaAngleDown } from "react-icons/fa";
-import { MdBarChart } from "react-icons/md";
-import { Link } from "react-router-dom";
 import { Heading } from "@chakra-ui/react";
 
 const PER_PAGE = 100;
 
-const Tableau = () => {
+const Racco = () => {
   const { colorMode } = useColorMode();
   const { user } = React.useContext(AuthContext);
   const shouldHideTable = user && user.profileData && user.profileData.admin;
@@ -81,7 +78,7 @@ const Tableau = () => {
     return records.sort((a, b) => {
       const dateA = new Date(a[sortConfig.key]);
       const dateB = new Date(b[sortConfig.key]);
-      if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) {
+      if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) { 
         return 0;
       }
       if (isNaN(dateA.getTime())) {
@@ -347,4 +344,4 @@ const Tableau = () => {
   );
 };
 
-export default Tableau;
+export default Racco;
