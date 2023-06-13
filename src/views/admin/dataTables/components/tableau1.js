@@ -15,6 +15,13 @@ import {
   ButtonGroup,
   Button,
   Flex,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
@@ -41,6 +48,14 @@ const Tableau = () => {
   const periods = ["Semaine", "Mois", "Année"];
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
+  // State variable to handle modal open/close state
+  const [isOpen, setIsOpen] = useState(false);
+  // State variable to handle details of the currently selected record
+  const [currentRecord, setCurrentRecord] = useState(null);
+  const handleOpenModal = (record) => {
+    setCurrentRecord(record);
+    setIsOpen(true);
+  }
   const [currentPage, setCurrentPage] = useState(0);
   const [sortConfig, setSortConfig] = useState({
     key: "CreatedDate",
@@ -59,6 +74,10 @@ const Tableau = () => {
 
   const [selectedDate, setSelectedDate] = useState(null);
 
+  const openModal = (record) => {
+    setCurrentRecord(record);
+    setIsOpen(true);
+  }
 
 
 
@@ -165,11 +184,13 @@ const Tableau = () => {
   };
 
   const handleCollapseToggle = (rowId) => {
+    
     if (collapsedRowId === rowId) {
       setCollapsedRowId(null);
     } else {
       setCollapsedRowId(rowId);
     }
+
   };
 
   const statuses = [
@@ -447,7 +468,12 @@ overflow={{ base: "auto", md: "auto" }}>
     {sortedRecords
       .slice(offset, offset + PER_PAGE)        .map((record, index) => (
         <React.Fragment key={record.Id}>
-          <Tr bg={getRowColor(record.Status__c)}>
+            <Tr 
+    bg={getRowColor(record.Status__c)}
+    onClick={() => handleOpenModal(record)}
+    style={{ cursor: "pointer" }}
+  >
+
             <Td
               onClick={() => handleCollapseToggle(record.Id)}
               style={{ cursor: "pointer" }}
@@ -467,53 +493,63 @@ overflow={{ base: "auto", md: "auto" }}>
             <Td>{t(record.Status__c)}</Td>
 
           </Tr>
-          <Collapse in={collapsedRowId === record.Id}>
-            <Box>
-              <VStack align="start" mt={2} mb={2}>
-                <Text>
-                  <strong>Adresse :</strong> {record.TchAddress__c}
-                </Text>
-                <Text>
-                  <strong>Statut du raccordement :</strong>{record.ConnectionStatus__c}
-                </Text>
-                <Text>
-                  <strong>Offre :</strong> {record.OfferName__c}
-                </Text>
-                <Text>
-                  <strong>Famille de l'offre :</strong>{" "}
-                  {record.FamilyOffer__c}
-                </Text>
-                <Text>
-                  <strong>Date de signature :</strong>{" "}
-                  {formatDate(record.SignatureDate__c)}
-                </Text>
-                <Text>
-                  <strong>Date de validation :</strong>{" "}
-                  {formatDate(record.ValidationDate__c)}
-                </Text>
-                <Text>
-                  <strong>Type de vente :</strong>{" "}
-                  {record.CustomerType__c}
-                </Text>
-                <Text>
-                  <strong>Numéro de commande :</strong>{" "}
-                  {record.OrderNumber__c}
-                </Text>
-                <Text>
-                  <strong>Numéro de panier :</strong>{" "}
-                  {record.BasketNumber__c}
-                </Text>
-                <Text>
-                  <strong>Commentaire du technicien :</strong>{" "}
-                  {record.Comment__c}
-                </Text>
-              </VStack>
-            </Box>
-          </Collapse>
+          
         </React.Fragment>
       ))}
   </Tbody>
 </Table>
+<Modal
+  isOpen={isOpen}
+  onClose={() => setIsOpen(false)}
+>
+  <ModalOverlay />
+  <ModalContent>
+    <ModalHeader>Détails de la vente</ModalHeader>
+    <ModalCloseButton />
+    <ModalBody>
+      {currentRecord && (
+        <VStack align="start" mt={2} mb={2}>
+          <Text>
+            <strong>Adresse :</strong> {currentRecord.TchAddress__c}
+          </Text>
+          <Text>
+            <strong>Statut du raccordement :</strong> {currentRecord.ConnectionStatus__c}
+          </Text>
+          <Text>
+            <strong>Offre :</strong> {currentRecord.OfferName__c}
+          </Text>
+          <Text>
+            <strong>Famille de l'offre :</strong> {currentRecord.FamilyOffer__c}
+          </Text>
+          <Text>
+            <strong>Date de signature :</strong> {formatDate(currentRecord.SignatureDate__c)}
+          </Text>
+          <Text>
+            <strong>Date de validation :</strong> {formatDate(currentRecord.ValidationDate__c)}
+          </Text>
+          <Text>
+            <strong>Type de vente :</strong> {currentRecord.CustomerType__c}
+          </Text>
+          <Text>
+            <strong>Numéro de commande :</strong> {currentRecord.OrderNumber__c}
+          </Text>
+          <Text>
+            <strong>Numéro de panier :</strong> {currentRecord.BasketNumber__c}
+          </Text>
+          <Text>
+            <strong>Commentaire du technicien :</strong> {currentRecord.Comment__c}
+          </Text>
+        </VStack>
+      )}
+    </ModalBody>
+    <ModalFooter>
+      <Button colorScheme="blue" mr={3} onClick={() => setIsOpen(false)}>
+        Fermer
+      </Button>
+    </ModalFooter>
+  </ModalContent>
+</Modal>
+
 <Box mt={6}>
   <ReactPaginate
     previousLabel={"←"}

@@ -10,20 +10,17 @@ const FileUpload = () => {
     setFile(e.target.files[0]);
   };
 
-  const onFileUpload = async () => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      await axios.post('/api/files/upload', formData);
-      console.log('Le fichier a été téléchargé avec succès !');
-  
-      // Afficher la destination du fichier
-      console.log('Destination du fichier :', '/uploads/' + file.name);
-    } catch (error) {
-      console.error('Une erreur s\'est produite lors du téléchargement du fichier :', error);
-    }
+  const onFileUpload = () => {
+    const formData = new FormData();
+    formData.append('file', file);
+    axios.post('/api/files/upload', formData)
+      .then(response => {
+        console.log(response.data); // Afficher la réponse du serveur
+      })
+      .catch(error => {
+        console.error(error); // Afficher l'erreur en cas d'échec de la requête
+      });
   };
-  
 
   // Si l'utilisateur n'est pas un administrateur, ne pas rendre le composant
   if (!user || !user.profileData || !user.profileData.admin) {
@@ -32,8 +29,38 @@ const FileUpload = () => {
 
   return (
     <div>
-      <input type="file" onChange={onFileChange} />
-      <button onClick={onFileUpload}>Télécharger</button>
+      <div
+        style={{
+          border: '2px dashed #ddd',
+          borderRadius: '5px',
+          padding: '1rem',
+          textAlign: 'center',
+          marginBottom: '1rem',
+        }}
+      >
+        {file ? (
+          <div>
+            <strong>Nom du fichier:</strong> {file.name}
+          </div>
+        ) : (
+          <div>
+            <strong>Glissez et déposez le fichier ici ou</strong>
+            <br />
+            <label htmlFor="fileInput">
+              <strong>cliquez pour sélectionner un fichier</strong>
+            </label>
+            <input
+              type="file"
+              id="fileInput"
+              style={{ display: 'none' }}
+              onChange={onFileChange}
+            />
+          </div>
+        )}
+      </div>
+      {file && (
+        <button onClick={onFileUpload}>Télécharger</button>
+      )}
     </div>
   );
 };
