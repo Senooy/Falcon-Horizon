@@ -10,10 +10,15 @@ const FileUpload = () => {
     setFile(e.target.files[0]);
   };
 
-  const onFileUpload = () => {
-    const formData = new FormData();
-    formData.append('file', file);
-    axios.post('/api/files/upload', formData);
+  const onFileUpload = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await axios.post('/api/files/upload', formData);
+      console.log('Le fichier a été téléchargé avec succès !');
+    } catch (error) {
+      console.error('Une erreur s\'est produite lors du téléchargement du fichier :', error);
+    }
   };
 
   // Si l'utilisateur n'est pas un administrateur, ne pas rendre le composant
