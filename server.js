@@ -4,7 +4,6 @@ const qs = require("qs");
 const cors = require("cors")
 const multer = require('multer');
 const path = require('path');
-const { spawn } = require('child_process');
 
 // Configuration de Multer pour le stockage des fichiers
 const storage = multer.diskStorage({
@@ -53,9 +52,23 @@ app.get("/api/salesforce_data", async (req, res) => {
 });
 
 // Route pour le téléchargement de fichiers
-app.post('/api/files/upload', upload.single('file'), (req, res) => {
-  res.json({ file: req.file });
+app.post('/api/files/upload', (req, res) => {
+  upload.single('file')(req, res, function(err) {
+    if (err instanceof multer.MulterError) {
+      // Une erreur Multer s'est produite lors de l'upload.
+      console.error(err);
+      res.status(500).json({ message: "Une erreur Multer s'est produite lors de l'upload." });
+    } else if (err) {
+      // Une erreur inconnue s'est produite lors de l'upload.
+      console.error(err);
+      res.status(500).json({ message: "Une erreur inconnue s'est produite lors de l'upload." });
+    }
+
+    // Si tout s'est bien passé, procédez comme d'habitude.
+    res.json({ file: req.file });
+  });
 });
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

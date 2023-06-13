@@ -1,35 +1,32 @@
-// react component importing a JSON file and using it to populate a table with data from the JSON file 
+import React, { useState, useContext } from 'react';
+import axios from 'axios';
+import { AuthContext } from 'contexts/AuthContext';
 
-import React, { useState, useEffect } from 'react';
-import data from './SFR63466.json';
+const FileUpload = () => {
+  const [file, setFile] = useState(null);
+  const { user } = useContext(AuthContext);
 
-function DataTable() {
-    const [tableData, setTableData] = useState([]);
-    
-    useEffect(() => {
-        setTableData(data);
-    }, []);
-    
-    return (
-        <table>
-        <thead>
-            <tr>
-            <th>Name</th>
-            <th>TchProspectName__c</th>
-            <th>TchAddress__c</th>
-            <th>CustomerCity__c</th>
-            </tr>
-        </thead>
-        <tbody>
-            {tableData.map((row) => (
-            <tr key={row.Id}>
-                <td>{row.Name}</td>
-                <td>{row.TchProspectName__c}</td>
-                <td>{row.TchAddress__c}</td>
-                <td>{row.CustomerCity__c}</td>
-            </tr>
-            ))}
-        </tbody>
-        </table>
-    );
-    }
+  const onFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const onFileUpload = () => {
+    const formData = new FormData();
+    formData.append('file', file);
+    axios.post('/api/files/upload', formData);
+  };
+
+  // Si l'utilisateur n'est pas un administrateur, ne pas rendre le composant
+  if (!user || !user.profileData || !user.profileData.admin) {
+    return null;
+  }
+
+  return (
+    <div>
+      <input type="file" onChange={onFileChange} />
+      <button onClick={onFileUpload}>Télécharger</button>
+    </div>
+  );
+};
+
+export default FileUpload;
