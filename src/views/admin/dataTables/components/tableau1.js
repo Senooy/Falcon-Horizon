@@ -510,6 +510,16 @@ overflow={{ base: "auto", md: "auto" }}>
       {currentRecord && (
         <VStack align="start" mt={2} mb={2}>
           <Text>
+            <strong>Client :</strong> {currentRecord.TchProspectName__c} 
+            </Text>
+            <Text>
+            <strong>Numéro :</strong> <a
+                href={`tel:${currentRecord.ProspectMobilePhone__c}`}
+                style={{ color: "blue" }}>
+                   {currentRecord.ProspectMobilePhone__c}
+                </a>
+            </Text>
+          <Text>
             <strong>Adresse :</strong> {currentRecord.TchAddress__c}
           </Text>
           <Text>
