@@ -2,13 +2,23 @@ const express = require("express");
 const axios = require("axios");
 const qs = require("qs");
 const cors = require("cors")
+const multer = require('multer');
+const path = require('path');
 const { spawn } = require('child_process');
+
+// Configuration de Multer pour le stockage des fichiers
+const storage = multer.diskStorage({
+  destination: './uploads',
+  filename: function(req, file, cb){
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
 
 // API Salesforce
 const app = express();
 app.use(express.json());
-
-
 app.use(cors())
 
 const token_url = "https://login.salesforce.com/services/oauth2/token";
@@ -40,6 +50,11 @@ app.get("/api/salesforce_data", async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Une erreur est survenue lors de la récupération des données." });
   }
+});
+
+// Route pour le téléchargement de fichiers
+app.post('/api/files/upload', upload.single('file'), (req, res) => {
+  res.json({ file: req.file });
 });
 
 const PORT = process.env.PORT || 3001;
