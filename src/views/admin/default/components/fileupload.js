@@ -16,10 +16,14 @@ const FileUpload = () => {
       formData.append('file', file);
       await axios.post('/api/files/upload', formData);
       console.log('Le fichier a été téléchargé avec succès !');
+  
+      // Afficher la destination du fichier
+      console.log('Destination du fichier :', '/uploads/' + file.name);
     } catch (error) {
       console.error('Une erreur s\'est produite lors du téléchargement du fichier :', error);
     }
   };
+  
 
   // Si l'utilisateur n'est pas un administrateur, ne pas rendre le composant
   if (!user || !user.profileData || !user.profileData.admin) {
