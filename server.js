@@ -13,7 +13,10 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 10000000 },  // Limite la taille des fichiers à 10MB
+});
 
 // API Salesforce
 const app = express();
