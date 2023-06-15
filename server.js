@@ -65,6 +65,24 @@ app.post('/api/upload', (req, res) => {
   });
 });
 
+// Route pour récupérer la liste des fichiers
+app.get('/api/files', (req, res) => {
+  const uploadDir = path.join(__dirname, '/public/uploads');
+  fs.readdir(uploadDir, (err, files) => {
+    if (err) {
+      return res.status(500).send('Une erreur est survenue lors de la récupération des fichiers.');
+    }
+    res.json(files);
+  });
+});
+
+// Route pour servir un fichier spécifique
+app.get('/api/files/:name', (req, res) => {
+  const filePath = path.join(__dirname, '/public/uploads', req.params.name);
+  res.sendFile(filePath);
+});
+
+
 // Route pour le téléchargement multiple de fichiers
 app.post('/api/files/uploadMultiple', (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
