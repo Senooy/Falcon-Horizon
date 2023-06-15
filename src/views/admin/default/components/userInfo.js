@@ -90,36 +90,15 @@ useEffect(() => {
   setFilteredRecords(searched);
 }, [records, filter, searchValue]);
 
-  const refreshJsonData = async () => {
-    try {
-      const response = await axios.post('/api/all_sales');
-      if (response.status === 200) {
-        fetchData(); // Réexécutez la fonction pour récupérer les données mises à jour
-      } else {
-        console.error('Erreur lors de la régénération du fichier all_sales.json');
-      }
-    } catch (error) {
-      console.error('Erreur lors de la régénération du fichier all_sales.json:', error);
-    }
-  };
 
-  const fetchData = async () => {
-    try {
-      const timestamp = Date.now(); // Génère un horodatage actuel
-      const url = `http://app.falconmarketing.fr/all_sales.json?timestamp=${timestamp}`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération du fichier all_sales.json");
-      }
-      const data = await response.json();
-      setRecords(data);
-      setFilteredRecords(data);
-    } catch (error) {
-      console.error("Erreur lors de la récupération du fichier all_sales.json:", error);
-    }
-  };
-  
-  
+const fetchData = async () => {
+  try {
+    const response = await axios.get("/api/all_sales");
+    setRecords(response.data);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des données JSON :", error);
+  }
+};
   
 
   const formatDate = (date) => {
