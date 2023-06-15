@@ -5,9 +5,6 @@ const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const path = require('path');
 
-
-
-
 // API Salesforce
 const app = express();
 app.use(express.json());
@@ -47,9 +44,10 @@ app.get('/api/salesforce_data', async (req, res) => {
   }
 });
 
+// Route pour le téléchargement de fichiers
 app.post('/api/files/upload', (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
-    return res.status(400).send('No files were uploaded.');
+    return res.status(400).send('Aucun fichier n\'a été téléchargé.');
   }
 
   let file = req.files.file;
@@ -57,14 +55,14 @@ app.post('/api/files/upload', (req, res) => {
     if (err)
       return res.status(500).send(err);
 
-    res.send('File uploaded!');
+    res.send('Fichier téléchargé !');
   });
 });
 
 // Route pour le téléchargement multiple de fichiers
 app.post('/api/files/uploadMultiple', (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
-    return res.status(400).send('No files were uploaded.');
+    return res.status(400).send('Aucun fichier n\'a été téléchargé.');
   }
 
   let files = req.files.files;
@@ -76,7 +74,7 @@ app.post('/api/files/uploadMultiple', (req, res) => {
     });
   });
 
-  res.send('Files uploaded!');
+  res.send('Fichiers téléchargés !');
 });
 
 const PORT = process.env.PORT || 3001;
