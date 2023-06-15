@@ -23,9 +23,7 @@ const upload = multer({
 // API Salesforce
 const app = express();
 app.use(express.json());
-app.use(cors({
-  origin: 'http:/app.falconmarketing.fr'  // remplacez par l'URL de votre client
-}));
+app.use(cors());
 
 const token_url = 'https://login.salesforce.com/services/oauth2/token';
 const token_payload = {
