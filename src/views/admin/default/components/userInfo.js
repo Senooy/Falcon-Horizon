@@ -106,9 +106,6 @@ useEffect(() => {
       console.error("Erreur lors de la récupération du fichier all_sales.json:", error);
     }
   };
-  
-  
-  
 
   const formatDate = (date) => {
     if (!date) {
