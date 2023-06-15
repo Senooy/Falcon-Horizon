@@ -62,11 +62,11 @@ app.post('/api/files/upload', (req, res) => {
     if (err instanceof multer.MulterError) {
       // Une erreur Multer s'est produite lors de l'upload.
       console.error(err);
-      res.status(500).json({ message: 'Une erreur Multer s\'est produite lors de l\'upload.' });
+      return res.status(500).json({ message: 'Une erreur Multer s\'est produite lors de l\'upload.' });
     } else if (err) {
       // Une erreur inconnue s'est produite lors de l'upload.
       console.error(err);
-      res.status(500).json({ message: 'Une erreur inconnue s\'est produite lors de l\'upload.' });
+      return res.status(500).json({ message: 'Une erreur inconnue s\'est produite lors de l\'upload.' });
     }
 
     // Si tout s'est bien passé, procédez comme d'habitude.
