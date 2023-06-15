@@ -7,17 +7,17 @@ const path = require('path');
 
 // Configuration de Multer pour le stockage des fichiers
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, 'uploads'));
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '/uploads'));
   },
-  filename: (req, file, cb) => {
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
   }
 });
 
 const upload = multer({ 
-  storage,
-  limits: { fileSize: 10000000 },  // Limit the file size to 10MB
+  storage: storage,
+  limits: { fileSize: 10000000 },  // Limite la taille des fichiers à 10MB
 });
 
 // API Salesforce
@@ -25,14 +25,13 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Cachez vos clés API, elles ne devraient jamais être codées en dur.
-const token_url = process.env.TOKEN_URL;
+const token_url = 'https://login.salesforce.com/services/oauth2/token';
 const token_payload = {
   grant_type: 'password',
-  client_id: process.env.CLIENT_ID,
-  client_secret: process.env.CLIENT_SECRET,
-  username: process.env.USERNAME,
-  password: process.env.PASSWORD,
+  client_id: '3MVG9I5UQ_0k_hTlxl9SwXkHaaX5kX0qAYQOq8c.PkG5DFWIFEwsrzI496JZ.GmBIIHFqnwDc75JvefLHSe.7',
+  client_secret: '352231377BC938C6935CBC9E243BF1180120947E65594D9EC35A6F230E3DFAA4',
+  username: 'falcon@api.circet',
+  password: 'Yfauconapi59-HJ4GRqJAcl9stoSszZ1sa1g1',
 };
 
 app.get('/api/salesforce_data', async (req, res) => {
@@ -52,20 +51,10 @@ app.get('/api/salesforce_data', async (req, res) => {
 
     res.json(salesData);
   } catch (error) {
-    console.error('Erreur : ', error.message);
-    if (error.response) {
-      // La demande a été effectuée et le serveur a répondu avec un statut d'erreur
-      console.error('Données : ', error.response.data);
-      console.error('Statut : ', error.response.status);
-      console.error('En-têtes : ', error.response.headers);
-    } else if (error.request) {
-      // La demande a été effectuée mais aucune réponse n'a été reçue
-      console.error('Requête : ', error.request);
-    }
+    console.error(error);
     res.status(500).json({ message: 'Une erreur est survenue lors de la récupération des données.' });
   }
 });
-
 
 // Serve les fichiers statiques de l'application React
 app.use(express.static(path.join(__dirname, 'client', 'build')));
@@ -75,13 +64,23 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
+
 // Route pour le téléchargement de fichiers
-app.post('/api/files/upload', upload.single('file'), (req, res) => {
-  if (req.file) {
+app.post('/api/files/upload', (req, res) => {
+  upload.single('file')(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      // Une erreur Multer s'est produite lors de l'upload.
+      console.error(err);
+      return res.status(500).json({ message: 'Une erreur Multer s\'est produite lors de l\'upload.' });
+    } else if (err) {
+      // Une erreur inconnue s'est produite lors de l'upload.
+      console.error(err);
+      return res.status(500).json({ message: 'Une erreur inconnue s\'est produite lors de l\'upload.' });
+    }
+
+    // Si tout s'est bien passé, procédez comme d'habitude.
     res.json({ file: req.file });
-  } else {
-    res.status(500).json({ message: 'Une erreur est survenue lors de l\'upload du fichier.' });
-  }
+  });
 });
 
 const PORT = process.env.PORT || 3001;
