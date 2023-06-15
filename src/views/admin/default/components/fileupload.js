@@ -4,21 +4,33 @@ import { AuthContext } from 'contexts/AuthContext';
 
 const FileUpload = () => {
   const [file, setFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
 
   const onFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    setError(null);
   };
 
   const onFileUpload = () => {
+    setIsLoading(true);
+    setError(null);
+
     const formData = new FormData();
     formData.append('file', file);
-    axios.post('/api/files/upload', formData)
-      .then(response => {
+
+    axios
+      .post('/api/files/upload', formData)
+      .then((response) => {
         console.log(response.data); // Afficher la réponse du serveur
+        setIsLoading(false);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error); // Afficher l'erreur en cas d'échec de la requête
+        setError('Une erreur s\'est produite lors du téléchargement du fichier.');
+        setIsLoading(false);
       });
   };
 
@@ -40,7 +52,7 @@ const FileUpload = () => {
       >
         {file ? (
           <div>
-            <strong>Nom du fichier:</strong> {file.name}
+            <strong>Nom du fichier :</strong> {file.name}
           </div>
         ) : (
           <div>
@@ -58,8 +70,23 @@ const FileUpload = () => {
           </div>
         )}
       </div>
+      {error && <div style={{ color: 'red' }}>{error}</div>}
       {file && (
-        <button onClick={onFileUpload}>Télécharger</button>
+        <button
+          style={{
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '0.5rem 1rem',
+            cursor: 'pointer',
+            opacity: isLoading ? 0.5 : 1,
+            pointerEvents: isLoading ? 'none' : 'auto',
+          }}
+          onClick={onFileUpload}
+        >
+          {isLoading ? 'Chargement...' : 'Télécharger'}
+        </button>
       )}
     </div>
   );

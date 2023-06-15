@@ -27,6 +27,7 @@ import { Heading } from "@chakra-ui/react";
 
 const PER_PAGE = 100;
 
+
 const Tableau = () => {
   const { colorMode } = useColorMode();
   const { user } = React.useContext(AuthContext);
