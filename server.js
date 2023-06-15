@@ -45,6 +45,8 @@ app.get('/api/salesforce_data', async (req, res) => {
   }
 });
 
+app.use('/public/uploads', express.static(path.join(__dirname, '/public/uploads')));
+
 // Route pour le téléchargement de fichiers
 app.post('/api/upload', (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
