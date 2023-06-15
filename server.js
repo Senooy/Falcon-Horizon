@@ -26,8 +26,8 @@ const token_payload = {
 // Get Salesforce access token
 const getSalesforceAccessToken = async () => {
   const response = await axios.post(
-    TOKEN_URL,
-    new URLSearchParams(TOKEN_PAYLOAD),
+    token_url,
+    new URLSearchParams(token_payload),
     {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -96,7 +96,7 @@ app.get('/api/sales', async (req, res) => {
     const allSales = await getAllSales(access_token, vendorIdsAndNames);
 
     // Compile data into a single JSON file
-    fs.writeFileSync("all_sales.json", JSON.stringify(allSales, null, 2));
+    fs.writeFileSync("public/all_sales.json", JSON.stringify(allSales, null, 2));
 
     res.json({ message: "All sales have been compiled into all_sales.json" });
   } catch (error) {
@@ -192,3 +192,18 @@ app.post('/api/files/uploadMultiple', (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Serveur en cours d'exécution sur le port ${PORT}`));
+
+// Fonction récursive pour exécuter la route toutes les 3 minutes
+const runSalesRoute = async () => {
+  try {
+    await axios.get('http://localhost:3001/api/sales');
+    console.log('Sales data updated successfully');
+  } catch (error) {
+    console.error('Error updating sales data:', error);
+  }
+
+  setTimeout(runSalesRoute, 3 * 60 * 1000); // Exécute la fonction toutes les 3 minutes
+};
+
+// Lancer la fonction récursive au démarrage du serveur
+runSalesRoute();
