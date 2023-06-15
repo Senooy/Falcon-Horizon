@@ -56,15 +56,6 @@ app.get('/api/salesforce_data', async (req, res) => {
   }
 });
 
-// Serve les fichiers statiques de l'application React
-app.use(express.static(path.join(__dirname, 'client', 'build')));
-
-// Route pour servir la page principale de l'application React
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-});
-
-
 // Route pour le téléchargement de fichiers
 app.post('/api/files/upload', (req, res) => {
   upload.single('file')(req, res, function (err) {
@@ -81,6 +72,14 @@ app.post('/api/files/upload', (req, res) => {
     // Si tout s'est bien passé, procédez comme d'habitude.
     res.json({ file: req.file });
   });
+});
+
+// Serve les fichiers statiques de l'application React
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
+// Route pour servir la page principale de l'application React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3001;
