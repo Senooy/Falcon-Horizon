@@ -2,28 +2,19 @@ const express = require('express');
 const axios = require('axios');
 const qs = require('qs');
 const cors = require('cors');
-const multer = require('multer');
+const fileUpload = require('express-fileupload');
 const path = require('path');
 
-// Configuration de Multer pour le stockage des fichiers
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '/uploads'));
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-  }
-});
 
-const upload = multer({ 
-  storage: storage,
-  limits: { fileSize: 10000000 },  // Limite la taille des fichiers à 10MB
-});
+
 
 // API Salesforce
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(fileUpload({
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limite la taille des fichiers à 10MB
+}));
 
 const token_url = 'https://login.salesforce.com/services/oauth2/token';
 const token_payload = {
@@ -56,30 +47,36 @@ app.get('/api/salesforce_data', async (req, res) => {
   }
 });
 
-// Route pour le téléchargement de fichiers
 app.post('/api/files/upload', (req, res) => {
-  upload.single('file')(req, res, function (err) {
-    if (err instanceof multer.MulterError) {
-      // Une erreur Multer s'est produite lors de l'upload.
-      console.error(err);
-      return res.status(500).json({ message: 'Une erreur Multer s\'est produite lors de l\'upload.' });
-    } else if (err) {
-      // Une erreur inconnue s'est produite lors de l'upload.
-      console.error(err);
-      return res.status(500).json({ message: 'Une erreur inconnue s\'est produite lors de l\'upload.' });
-    }
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
 
-    // Si tout s'est bien passé, procédez comme d'habitude.
-    res.json({ file: req.file });
+  let file = req.files.file;
+  file.mv(path.join(__dirname, '/uploads', file.name), function(err) {
+    if (err)
+      return res.status(500).send(err);
+
+    res.send('File uploaded!');
   });
 });
 
-// Serve les fichiers statiques de l'application React
-app.use(express.static(path.join(__dirname, 'client', 'build')));
+// Route pour le téléchargement multiple de fichiers
+app.post('/api/files/uploadMultiple', (req, res) => {
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
 
-// Route pour servir la page principale de l'application React
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+  let files = req.files.files;
+
+  files.forEach(file => {
+    file.mv(path.join(__dirname, '/uploads', file.name), function(err) {
+      if (err)
+        return res.status(500).send(err);
+    });
+  });
+
+  res.send('Files uploaded!');
 });
 
 const PORT = process.env.PORT || 3001;
