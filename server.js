@@ -4,6 +4,7 @@ const qs = require('qs');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const path = require('path');
+const fs = require('fs'); // Ajout de l'importation du module fs
 
 // API Salesforce
 const app = express();
@@ -45,19 +46,25 @@ app.get('/api/salesforce_data', async (req, res) => {
 });
 
 // Route pour le téléchargement de fichiers
-app.post('/api/files/upload',function(req, res) {
-     
-  upload(req, res, function (err) {
-         if (err instanceof multer.MulterError) {
-             return res.status(500).json(err)
-         } else if (err) {
-             return res.status(500).json(err)
-         }
-    return res.status(200).send(req.file)
+app.post('/api/files/upload', (req, res) => {
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('Aucun fichier n\'a été téléchargé.');
+  }
 
-  })
+  const uploadDir = path.join(__dirname, '/public/uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+  }
 
+  let file = req.files.file;
+  file.mv(path.join(uploadDir, file.name), function(err) {
+    if (err)
+      return res.status(500).send(err);
+
+    res.send('Fichier téléchargé !');
+  });
 });
+
 // Route pour le téléchargement multiple de fichiers
 app.post('/api/files/uploadMultiple', (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
