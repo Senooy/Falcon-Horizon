@@ -4,6 +4,7 @@ const qs = require('qs');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const path = require('path');
+const fs = require('fs');
 
 // API Salesforce
 const app = express();
@@ -50,8 +51,13 @@ app.post('/api/files/upload', (req, res) => {
     return res.status(400).send('Aucun fichier n\'a été téléchargé.');
   }
 
+  const uploadDir = path.join(__dirname, '/uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+  }
+
   let file = req.files.file;
-  file.mv(path.join(__dirname, '/uploads', file.name), function(err) {
+  file.mv(path.join(uploadDir, file.name), function(err) {
     if (err)
       return res.status(500).send(err);
 
@@ -65,10 +71,15 @@ app.post('/api/files/uploadMultiple', (req, res) => {
     return res.status(400).send('Aucun fichier n\'a été téléchargé.');
   }
 
+  const uploadDir = path.join(__dirname, '/uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+  }
+
   let files = req.files.files;
 
   files.forEach(file => {
-    file.mv(path.join(__dirname, '/uploads', file.name), function(err) {
+    file.mv(path.join(uploadDir, file.name), function(err) {
       if (err)
         return res.status(500).send(err);
     });
