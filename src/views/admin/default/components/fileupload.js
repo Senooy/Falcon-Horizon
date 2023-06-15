@@ -1,49 +1,99 @@
-import { useState } from 'react';
-import { Box, Button, Text } from '@chakra-ui/react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from 'contexts/AuthContext';
 
 const FileUpload = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState('');
+  const [file, setFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const { user } = useContext(AuthContext);
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+  const onFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    setError(null);
+    setSuccess(null);
   };
 
-  const handleUpload = async () => {
-    if (selectedFile) {
-      try {
-        const formData = new FormData();
-        formData.append('file', selectedFile);
+  const onFileUpload = () => {
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
 
-        const response = await axios.post('/api/files/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+    const formData = new FormData();
+    formData.append('file', file);
 
-        setUploadStatus('Le fichier a été téléchargé avec succès !');
-        console.log(response.data);
-      } catch (error) {
-        setUploadStatus('Une erreur s\'est produite lors du téléchargement du fichier.');
-        console.error(error);
-      }
-    } else {
-      setUploadStatus('Aucun fichier sélectionné.');
-    }
+    axios
+      .post('/api/files/upload', formData)
+      .then((response) => {
+        console.log(response.data); // Afficher la réponse du serveur
+        setIsLoading(false);
+        setSuccess('Fichier téléchargé avec succès !');
+      })
+      .catch((error) => {
+        console.error(error); // Afficher l'erreur en cas d'échec de la requête
+        setError('Une erreur s\'est produite lors du téléchargement du fichier.');
+        setIsLoading(false);
+      });
   };
+
+  // Si l'utilisateur n'est pas un administrateur, ne pas rendre le composant
+  if (!user || !user.profileData || !user.profileData.admin) {
+    return null;
+  }
 
   return (
-    <Box>
-      <input type="file" onChange={handleFileChange} />
-      <Button colorScheme="blue" onClick={handleUpload}>
-        Envoyer
-      </Button>
-      {selectedFile && (
-        <Text mt={2}>Fichier sélectionné : {selectedFile.name}</Text>
+    <div>
+      <div
+        style={{
+          border: '2px dashed #ddd',
+          borderRadius: '5px',
+          padding: '1rem',
+          textAlign: 'center',
+          marginBottom: '1rem',
+        }}
+      >
+        {file ? (
+          <div>
+            <strong>Nom du fichier :</strong> {file.name}
+          </div>
+        ) : (
+          <div>
+            <strong>Glissez et déposez le fichier ici ou</strong>
+            <br />
+            <label htmlFor="fileInput">
+              <strong>cliquez pour sélectionner un fichier</strong>
+            </label>
+            <input
+              type="file"
+              id="fileInput"
+              style={{ display: 'none' }}
+              onChange={onFileChange}
+            />
+          </div>
+        )}
+      </div>
+      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {success && <div style={{ color: 'green' }}>{success}</div>}
+      {file && (
+        <button
+          style={{
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '0.5rem 1rem',
+            cursor: 'pointer',
+            opacity: isLoading ? 0.5 : 1,
+            pointerEvents: isLoading ? 'none' : 'auto',
+          }}
+          onClick={onFileUpload}
+        >
+          {isLoading ? 'Chargement...' : 'Télécharger'}
+        </button>
       )}
-      {uploadStatus && <Text mt={2}>{uploadStatus}</Text>}
-    </Box>
+    </div>
   );
 };
 
