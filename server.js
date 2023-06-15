@@ -4,7 +4,6 @@ const qs = require('qs');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const path = require('path');
-const fs = require('fs');
 
 // API Salesforce
 const app = express();
