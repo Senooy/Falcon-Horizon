@@ -50,7 +50,7 @@ app.post('/api/files/upload', (req, res) => {
     return res.status(400).send('Aucun fichier n\'a été téléchargé.');
   }
 
-  const uploadDir = path.join(__dirname, '/uploads');
+  const uploadDir = path.join(__dirname, '/public/uploads');
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
   }
