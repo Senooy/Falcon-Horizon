@@ -46,7 +46,7 @@ app.get('/api/salesforce_data', async (req, res) => {
 });
 
 // Route pour le téléchargement de fichiers
-app.post('/api/files/upload', (req, res) => {
+app.post('/api/upload', (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).send('Aucun fichier n\'a été téléchargé.');
   }
