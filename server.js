@@ -23,6 +23,88 @@ const token_payload = {
   password: 'Yfauconapi59-HJ4GRqJAcl9stoSszZ1sa1g1',
 };
 
+// Get Salesforce access token
+const getSalesforceAccessToken = async () => {
+  const response = await axios.post(
+    TOKEN_URL,
+    new URLSearchParams(TOKEN_PAYLOAD),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+  return response.data.access_token;
+};
+
+// Retrieve Salesforce data
+const getSalesforceData = async (access_token, url) => {
+  const response = await axios.get(url, {
+    headers: {
+      "Authorization": `Bearer ${access_token}`,
+    },
+  });
+  return response.data;
+};
+
+// Retrieve vendor IDs
+const getVendorIdsAndNames = async (access_token) => {
+  const url = "https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/listviews/00B0O00000AkAHTUA3/results";
+  const data = await getSalesforceData(access_token, url);
+  const vendorIdsAndNames = {};
+
+  for (const record of data.records) {
+    let id = null;
+    let name = null;
+    for (const column of record.columns) {
+      if (column.fieldNameOrPath === "Id") {
+        id = column.value;
+      } else if (column.fieldNameOrPath === "Name") {
+        name = column.value;
+      }
+    }
+    if (id && name) {
+      vendorIdsAndNames[id] = name;
+    }
+  }
+
+  return vendorIdsAndNames;
+};
+
+// Retrieve all sales for each vendor ID and add the vendor name to each sale
+const getAllSales = async (access_token, vendorIdsAndNames) => {
+  const allSales = [];
+
+  for (const [vendorId, vendorName] of Object.entries(vendorIdsAndNames)) {
+    const salesUrl = `https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/${vendorId}/Sales__r`;
+    const salesData = await getSalesforceData(access_token, salesUrl);
+    for (const sale of salesData.records) {
+      // Add the vendor name to the sale
+      sale.VendorName__c = vendorName;
+    }
+    allSales.push(...salesData.records);
+  }
+
+  return allSales;
+};
+
+// Main route
+app.get('/api/sales', async (req, res) => {
+  try {
+    const access_token = await getSalesforceAccessToken();
+    const vendorIdsAndNames = await getVendorIdsAndNames(access_token);
+    const allSales = await getAllSales(access_token, vendorIdsAndNames);
+
+    // Compile data into a single JSON file
+    fs.writeFileSync("all_sales.json", JSON.stringify(allSales, null, 2));
+
+    res.json({ message: "All sales have been compiled into all_sales.json" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "An error occurred" });
+  }
+});
+
 app.get('/api/salesforce_data', async (req, res) => {
   try {
     const { data } = await axios.post(token_url, qs.stringify(token_payload), {
