@@ -52,10 +52,20 @@ app.get('/api/salesforce_data', async (req, res) => {
 
     res.json(salesData);
   } catch (error) {
-    console.error(error);
+    console.error('Erreur : ', error.message);
+    if (error.response) {
+      // La demande a été effectuée et le serveur a répondu avec un statut d'erreur
+      console.error('Données : ', error.response.data);
+      console.error('Statut : ', error.response.status);
+      console.error('En-têtes : ', error.response.headers);
+    } else if (error.request) {
+      // La demande a été effectuée mais aucune réponse n'a été reçue
+      console.error('Requête : ', error.request);
+    }
     res.status(500).json({ message: 'Une erreur est survenue lors de la récupération des données.' });
   }
 });
+
 
 // Serve les fichiers statiques de l'application React
 app.use(express.static(path.join(__dirname, 'client', 'build')));
