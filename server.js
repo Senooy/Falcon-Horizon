@@ -98,12 +98,14 @@ app.get('/api/sales', async (req, res) => {
     // Compile data into a single JSON file
     fs.writeFileSync("public/all_sales.json", JSON.stringify(allSales, null, 2));
 
-    res.json({ message: "All sales have been compiled into all_sales.json" });
+    // Return the sales data as response
+    res.json(allSales);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "An error occurred" });
   }
 });
+
 
 app.get('/api/salesforce_data', async (req, res) => {
   try {

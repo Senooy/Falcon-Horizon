@@ -94,7 +94,7 @@ useEffect(() => {
 const fetchData = async () => {
   try {
     const salesCode = user.profileData.salesCode; // suppose user object contains salesCode
-    const response = await axios.get(`http://app.falconmarketing.fr/api/sales`);
+    const response = await axios.get(`http://app.falconmarketing.fr:3001/api/sales`);
     const salesData = response.data;
     setRecords(salesData);
     setFilteredRecords(salesData);
