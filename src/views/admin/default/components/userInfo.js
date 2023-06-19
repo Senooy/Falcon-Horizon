@@ -45,6 +45,7 @@ const Tableau = () => {
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [jsonData, setJsonData] = useState(null);
   const [sortConfig, setSortConfig] = useState({
     key: "CreatedDate",
     ascending: false,
@@ -92,17 +93,17 @@ useEffect(() => {
 
 const fetchData = async () => {
   try {
-    const { data } = await axios.get(
-      "http://app.falconmarketing.fr:3001/api/sales", 
-      { headers: { 'Cache-Control': 'no-cache' } }
-    );
-    setRecords(data.records);
-    const filtered = filterRecords(filter.period, filter.status, filter.hasConnectingDate);
-    setFilteredRecords(filtered);
+    const salesCode = user.profileData.salesCode; // suppose user object contains salesCode
+    const response = await axios.get(`http://app.falconmarketing.fr:3001/api/sales?nocache=${new Date().getTime()}`);
+    const salesData = response.data;
+    setRecords(salesData);
+    setFilteredRecords(salesData);
+    setJsonData(salesData); // Met à jour les données JSON
   } catch (error) {
-    console.log(error);
+    console.error("Erreur lors de la récupération des données de Salesforce :", error);
   }
 };
+
 
 
   const formatDate = (date) => {
