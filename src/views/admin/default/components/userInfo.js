@@ -132,8 +132,7 @@ const Tableau = () => {
   const fetchData = async () => {
     try {
       const { data } = await axios.get(
-        "http://app.falconmarketing.fr:3001/api/salesforce_data?salesCode=" +
-          `${user.profileData.salesCode}`
+        "http://app.falconmarketing.fr:3001/api/sales"
       );
       setRecords(data.records);
       const filtered = filterRecords(filter.period, filter.status, filter.hasConnectingDate);
