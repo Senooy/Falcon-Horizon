@@ -93,17 +93,16 @@ useEffect(() => {
 
 const fetchData = async () => {
   try {
-    const salesCode = user.profileData.salesCode; // suppose user object contains salesCode
-    const response = await axios.get(`http://app.falconmarketing.fr:3001/api/sales`);
-    const salesData = response.data;
-    setRecords(salesData);
-    setFilteredRecords(salesData);
-    setJsonData(salesData); // Met à jour les données JSON
+    const { data } = await axios.get(
+      "http://app.falconmarketing.fr:3001/api/sales"
+    );
+    setRecords(data.records);
+    const filtered = filterRecords(filter.period, filter.status, filter.hasConnectingDate);
+    setFilteredRecords(filtered);
   } catch (error) {
-    console.error("Erreur lors de la récupération des données de Salesforce :", error);
+    console.log(error);
   }
 };
-
 
   const formatDate = (date) => {
     if (!date) {
