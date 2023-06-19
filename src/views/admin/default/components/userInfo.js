@@ -15,7 +15,6 @@ import {
   ButtonGroup,
   Button,
   Flex,
-  IconButton,
 } from "@chakra-ui/react";
 import { FaRedo } from 'react-icons/fa';
 import axios from "axios";
@@ -94,14 +93,14 @@ useEffect(() => {
 
 const fetchData = async () => {
   try {
-    const timestamp = Date.now(); // Génère un horodatage actuel
-    const url = `http://app.falconmarketing.fr/all_sales.json?timestamp=${timestamp}`;
-    const response = await axios.get(url);
-    setRecords(response.data);
-    setFilteredRecords(response.data);
-    setJsonData(response.data); // Met à jour les données JSON
+    const salesCode = user.profileData.salesCode; // suppose user object contains salesCode
+    const response = await axios.get(`http://localhost:3001/api/sales`);
+    const salesData = response.data;
+    setRecords(salesData);
+    setFilteredRecords(salesData);
+    setJsonData(salesData); // Met à jour les données JSON
   } catch (error) {
-    console.error("Erreur lors de la récupération du fichier all_sales.json :", error);
+    console.error("Erreur lors de la récupération des données de Salesforce :", error);
   }
 };
 
