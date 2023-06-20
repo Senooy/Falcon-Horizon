@@ -54,6 +54,8 @@ const urls = [
   "https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/listviews/00B0O000009lGVqUAM/results",
   "https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/listviews/00B0O00000Ak6lHUAR/results",
   "https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/listviews/00B0O00000Ak8GnUAJ/results",
+  "https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/listviews/00B3Y00000Ay7uMUAR/results",
+  "https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/listviews/00B0O00000Ak6lGUAR/results",
   // Ajouter plus d'URLs ici
 
 ];
@@ -81,9 +83,14 @@ const getVendorIdsAndNames = async (access_token) => {
       }
     }
   }
+  
+  // Ajouter manuellement des identifiants de fournisseur ici
+  vendorIdsAndNames["003AM0000025x19YAA"] = "Matthieu SLOSZEK";
+  // Ajouter autant d'identifiants que vous le souhaitez
 
   return vendorIdsAndNames;
 };
+
 
 // Retrieve all sales for each vendor ID and add the vendor name to each sale
 const getAllSales = async (access_token, vendorIdsAndNames) => {
