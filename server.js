@@ -47,24 +47,37 @@ const getSalesforceData = async (access_token, url) => {
   return response.data;
 };
 
+// Créer un tableau pour stocker les URLs
+const urls = [
+  "https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/listviews/00B0O00000AkAHTUA3/results",
+  "https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/listviews/00B0O00000B00wQUAR/results",
+  "https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/listviews/00B0O000009lGVqUAM/results",
+
+  // Ajouter plus d'URLs ici
+
+];
+
 // Retrieve vendor IDs
 const getVendorIdsAndNames = async (access_token) => {
-  const url = "https://circet.my.salesforce.com/services/data/v56.0/sobjects/Contact/listviews/00B0O00000AkAHTUA3/results";
-  const data = await getSalesforceData(access_token, url);
   const vendorIdsAndNames = {};
 
-  for (const record of data.records) {
-    let id = null;
-    let name = null;
-    for (const column of record.columns) {
-      if (column.fieldNameOrPath === "Id") {
-        id = column.value;
-      } else if (column.fieldNameOrPath === "Name") {
-        name = column.value;
+  for (const url of urls) {
+    const data = await getSalesforceData(access_token, url);
+
+    for (const record of data.records) {
+      let id = null;
+      let name = null;
+      for (const column of record.columns) {
+        if (column.fieldNameOrPath === "Id") {
+          id = column.value;
+        } else if (column.fieldNameOrPath === "Name") {
+          name = column.value;
+        }
       }
-    }
-    if (id && name) {
-      vendorIdsAndNames[id] = name;
+      // Ajouter uniquement l'identifiant du fournisseur s'il n'existe pas déjà
+      if (id && name && !vendorIdsAndNames.hasOwnProperty(id)) {
+        vendorIdsAndNames[id] = name;
+      }
     }
   }
 
@@ -87,6 +100,7 @@ const getAllSales = async (access_token, vendorIdsAndNames) => {
 
   return allSales;
 };
+
 
 // Main route
 app.get('/api/sales', async (req, res) => {
