@@ -94,7 +94,11 @@ useEffect(() => {
 const fetchData = async () => {
   try {
     const salesCode = user.profileData.salesCode; // suppose user object contains salesCode
-    const response = await axios.get(`http://app.falconmarketing.fr:3001/api/sales?nocache=${new Date().getTime()}`);
+    const response = await axios.get(`http://app.falconmarketing.fr:3001/api/sales?nocache=${new Date().getTime()}`, {
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    });
     const salesData = response.data;
     setRecords(salesData);
     setFilteredRecords(salesData);
@@ -103,6 +107,7 @@ const fetchData = async () => {
     console.error("Erreur lors de la récupération des données de Salesforce :", error);
   }
 };
+
 
 
 

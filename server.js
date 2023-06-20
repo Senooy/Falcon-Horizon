@@ -4,18 +4,14 @@ const qs = require('qs');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs'); // Ajout de l'importation du module fs
 
 // API Salesforce
 const app = express();
-app.use((req, res, next) => {
-  res.set('Cache-Control', 'no-store');
-  next();
-});
 app.use(express.json());
 app.use(cors());
 app.use(fileUpload({
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limite la taille des fichiers à 10MB
 }));
 
 const token_url = 'https://login.salesforce.com/services/oauth2/token';
@@ -99,14 +95,17 @@ app.get('/api/sales', async (req, res) => {
     const vendorIdsAndNames = await getVendorIdsAndNames(access_token);
     const allSales = await getAllSales(access_token, vendorIdsAndNames);
 
+    // Compile data into a single JSON file
     fs.writeFileSync("public/all_sales.json", JSON.stringify(allSales, null, 2));
 
+    // Return the sales data as response
     res.json(allSales);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "An error occurred" });
   }
 });
+
 
 app.get('/api/salesforce_data', async (req, res) => {
   try {
@@ -126,15 +125,16 @@ app.get('/api/salesforce_data', async (req, res) => {
     res.json(salesData);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'An error occurred while retrieving data.' });
+    res.status(500).json({ message: 'Une erreur est survenue lors de la récupération des données.' });
   }
 });
 
 app.use('/public/uploads', express.static(path.join(__dirname, '/public/uploads')));
 
+// Route pour le téléchargement de fichiers
 app.post('/api/upload', (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
-    return res.status(400).send('No files were uploaded.');
+    return res.status(400).send('Aucun fichier n\'a été téléchargé.');
   }
 
   const uploadDir = path.join(__dirname, '/public/uploads');
@@ -147,28 +147,32 @@ app.post('/api/upload', (req, res) => {
     if (err)
       return res.status(500).send(err);
 
-    res.send('File uploaded!');
+    res.send('Fichier téléchargé !');
   });
 });
 
+// Route pour récupérer la liste des fichiers
 app.get('/api/files', (req, res) => {
   const uploadDir = path.join(__dirname, '/public/uploads');
   fs.readdir(uploadDir, (err, files) => {
     if (err) {
-      return res.status(500).send('An error occurred while retrieving files.');
+      return res.status(500).send('Une erreur est survenue lors de la récupération des fichiers.');
     }
     res.json(files);
   });
 });
 
+// Route pour servir un fichier spécifique
 app.get('/api/files/:name', (req, res) => {
   const filePath = path.join(__dirname, '/public/uploads', req.params.name);
   res.sendFile(filePath);
 });
 
+
+// Route pour le téléchargement multiple de fichiers
 app.post('/api/files/uploadMultiple', (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
-    return res.status(400).send('No files were uploaded.');
+    return res.status(400).send('Aucun fichier n\'a été téléchargé.');
   }
 
   const uploadDir = path.join(__dirname, '/uploads');
@@ -185,8 +189,23 @@ app.post('/api/files/uploadMultiple', (req, res) => {
     });
   });
 
-  res.send('Files uploaded!');
+  res.send('Fichiers téléchargés !');
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Serveur en cours d'exécution sur le port ${PORT}`));
+
+// Fonction récursive pour exécuter la route toutes les 3 minutes
+const runSalesRoute = async () => {
+  try {
+    await axios.get('http://localhost:3001/api/sales');
+    console.log('Sales data updated successfully');
+  } catch (error) {
+    console.error('Error updating sales data:', error);
+  }
+
+  setTimeout(runSalesRoute, 3 * 60 * 1000); // Exécute la fonction toutes les 3 minutes
+};
+
+// Lancer la fonction récursive au démarrage du serveur
+runSalesRoute();
