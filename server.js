@@ -86,6 +86,7 @@ const getVendorIdsAndNames = async (access_token) => {
   
   // Ajouter manuellement des identifiants de fournisseur ici
   vendorIdsAndNames["003AM0000025x19YAA"] = "Matthieu SLOSZEK";
+  vendorIdsAndNames["003AM000002VmTUYA0"] = "Rilès ZENOUD";
   // Ajouter autant d'identifiants que vous le souhaitez
 
   return vendorIdsAndNames;
