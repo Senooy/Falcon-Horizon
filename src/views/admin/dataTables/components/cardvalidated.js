@@ -4,12 +4,24 @@ import { AuthContext } from "contexts/AuthContext";
 import { useColorModeValue } from '@chakra-ui/react';
 import axios from 'axios';
 
+const UserContrats = () => {
+    const { user } = useContext(AuthContext);
+  
+    if (user && user.profileData && !user.profileData.admin) {
+      return <ContratsValides />;
+    }
+  
+    return null;
+};
+
 const ContratsValides = () => {
+    
     const { user } = useContext(AuthContext);
     const [records, setRecords] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const bgColor = useColorModeValue("white", "gray.800");
+    
 
     const fetchData = async () => {
         try {
@@ -108,4 +120,4 @@ const ContratsValides = () => {
     );
 };
 
-export default ContratsValides;
+export default UserContrats;

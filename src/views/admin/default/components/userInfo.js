@@ -15,6 +15,13 @@ import {
   ButtonGroup,
   Button,
   Flex,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
 } from "@chakra-ui/react";
 import { FaRedo } from 'react-icons/fa';
 import axios from "axios";
@@ -23,6 +30,7 @@ import ReactPaginate from "react-paginate";
 import "views/admin/dataTables/components/pagination.css";
 import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
+import { MdOutlineRotateLeft } from "react-icons/md"
 import { Link } from "react-router-dom";
 import { Input } from "@chakra-ui/react";
 import { Select } from "@chakra-ui/react";
@@ -83,7 +91,9 @@ const Tableau = () => {
     setIsOpen(true);
   }
 
-
+  const resetDatePicker = () => {
+    setSelectedDate(null); // Clear the selected date
+  };
 
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
@@ -412,7 +422,7 @@ const getRowColors = (status) => {
   </Box>
 
   <Box mb={4}>
-    
+
   <ButtonGroup isAttached spacing={20} width={{ base: "100%", md: "auto" }} mb={4}>
   {statuses.map((status) => (
     <Button
@@ -427,18 +437,23 @@ const getRowColors = (status) => {
   ))}
 </ButtonGroup>
 
-  <Box mb={4}
-  spacing={20}
-  >
-     <p>Facturation :</p>
-  <DatePicker
-  selected={selectedDate}  // La date actuellement sélectionnée
-  onChange={handleDateChange}  // Le gestionnaire pour changer la date
-  dateFormat="MM/yyyy"  // Le format de la date
-  showMonthYearPicker  // Pour afficher le sélecteur de mois/année
-  placeholderText="Choisir une date"  // Le texte affiché lorsque rien n'est sélectionné
-/>
-  </Box>
+<Box mb={4} spacing={20}>
+  <Text fontWeight="bold">Facturation :</Text>
+  <Flex direction="row" alignItems="center">
+    <DatePicker
+      selected={selectedDate}
+      onChange={handleDateChange}
+      dateFormat="MM/yyyy"
+      showMonthYearPicker
+      placeholderText="Choisir une date"
+    />
+    <Button onClick={resetDatePicker} variant="outline" marginLeft={2}>
+      <MdOutlineRotateLeft />
+    </Button>
+  </Flex>
+</Box>
+
+
     </Box>
 
 </Flex>
@@ -448,17 +463,24 @@ const getRowColors = (status) => {
 <Table variant="simple"
 overflow={{ base: "auto", md: "auto" }}>
   <Thead>
+    
     <Tr>
       <Th>Détails</Th>
-      <Th>Vendeur</Th>
       <Th
         onClick={() => toggleSortDirection("CreatedDate")}
         style={{ cursor: "pointer" }}
       >
         Date de la vente
       </Th>
+      <Th>Vendeur</Th>
       <Th>Nom</Th>
-      <Th>Date de raccordement</Th>
+      <Th>Numéro de téléphone</Th>
+      <Th
+  onClick={() => toggleSortDirection("ConnectingDatePlanned__c")}
+  style={{ cursor: "pointer" }}
+>
+  Date de raccordement prévue
+</Th>
       <Th>Statut</Th>
     </Tr>
   </Thead>
@@ -467,76 +489,99 @@ overflow={{ base: "auto", md: "auto" }}>
     {sortedRecords
       .slice(offset, offset + PER_PAGE)        .map((record, index) => (
         <React.Fragment key={record.Id}>
-          <Tr bg={getRowColor(record.Status__c)}>
+            <Tr 
+    bg={getRowColor(record.Status__c)}
+    onClick={() => handleOpenModal(record)}
+    style={{ cursor: "pointer" }}
+  >
+
             <Td
               onClick={() => handleCollapseToggle(record.Id)}
               style={{ cursor: "pointer" }}
             >
               {record.TchPhone__c} <FaAngleDown />
             </Td>
-            <Td>{record.VendorName__c}</Td>
             <Td>{record.CreatedDate}</Td>
+            <Td>{record.VendorName__c}</Td>
             <Td>{record.TchProspectName__c}</Td>
+                <Td>
+                <a
+                href={`tel:${record.ProspectMobilePhone__c}`}
+                style={{ color: "blue" }}>
+                   {record.ProspectMobilePhone__c}
+                </a>
+                </Td>
             <Td>{record.ConnectingDatePlanned__c}</Td>
-            <Td>{record.Status__c}</Td>
+            <Td>{t(record.Status__c)}</Td>
 
           </Tr>
-          <Collapse in={collapsedRowId === record.Id}>
-            <Box>
-              <VStack align="start" mt={2} mb={2}>
-                <Text>
-                  <strong>Adresse :</strong> {record.TchAddress__c}
-                </Text>
-                <Text>
-                  <strong>Mobile :</strong>{" "}
-                  <a
-                    href="tel:{record.ProspectMobilePhone__c}"
-                    style={{ color: "blue" }}
-                  >
-                    {record.ProspectMobilePhone__c}
-                  </a>
-                </Text>
-                <Text>
-                  <strong>Statut du raccordement :</strong>{record.ConnectionStatus__c}
-                </Text>
-                <Text>
-                  <strong>Offre :</strong> {record.OfferName__c}
-                </Text>
-                <Text>
-                  <strong>Famille de l'offre :</strong>{" "}
-                  {record.FamilyOffer__c}
-                </Text>
-                <Text>
-                  <strong>Date de signature :</strong>{" "}
-                  {formatDate(record.SignatureDate__c)}
-                </Text>
-                <Text>
-                  <strong>Date de validation :</strong>{" "}
-                  {formatDate(record.ValidationDate__c)}
-                </Text>
-                <Text>
-                  <strong>Type de vente :</strong>{" "}
-                  {record.CustomerType__c}
-                </Text>
-                <Text>
-                  <strong>Numéro de commande :</strong>{" "}
-                  {record.OrderNumber__c}
-                </Text>
-                <Text>
-                  <strong>Numéro de panier :</strong>{" "}
-                  {record.BasketNumber__c}
-                </Text>
-                <Text>
-                  <strong>Commentaire du technicien :</strong>{" "}
-                  {record.Comment__c}
-                </Text>
-              </VStack>
-            </Box>
-          </Collapse>
+          
         </React.Fragment>
       ))}
   </Tbody>
 </Table>
+<Modal
+  isOpen={isOpen}
+  onClose={() => setIsOpen(false)}
+>
+  <ModalOverlay />
+  <ModalContent>
+    <ModalHeader>Détails de la vente</ModalHeader>
+    <ModalCloseButton />
+    <ModalBody>
+      {currentRecord && (
+        <VStack align="start" mt={2} mb={2}>
+          <Text>
+            <strong>Client :</strong> {currentRecord.TchProspectName__c} 
+            </Text>
+            <Text>
+            <strong>Numéro :</strong> <a
+                href={`tel:${currentRecord.ProspectMobilePhone__c}`}
+                style={{ color: "blue" }}>
+                   {currentRecord.ProspectMobilePhone__c}
+                </a>
+            </Text>
+          <Text>
+            <strong>Adresse :</strong> {currentRecord.TchAddress__c}
+          </Text>
+          <Text>
+            <strong>Statut du raccordement :</strong> {currentRecord.ConnectionStatus__c}
+          </Text>
+          <Text>
+            <strong>Offre :</strong> {currentRecord.OfferName__c}
+          </Text>
+          <Text>
+            <strong>Famille de l'offre :</strong> {currentRecord.FamilyOffer__c}
+          </Text>
+          <Text>
+            <strong>Date de signature :</strong> {formatDate(currentRecord.SignatureDate__c)}
+          </Text>
+          <Text>
+            <strong>Date de validation :</strong> {formatDate(currentRecord.ValidationDate__c)}
+          </Text>
+          <Text>
+            <strong>Type de vente :</strong> {currentRecord.CustomerType__c}
+          </Text>
+          <Text>
+            <strong>Numéro de commande :</strong> {currentRecord.OrderNumber__c}
+          </Text>
+          <Text>
+            <strong>Numéro de panier :</strong> {currentRecord.BasketNumber__c}
+          </Text>
+          <Text>
+            <strong>Commentaire du technicien :</strong> {currentRecord.Comment__c}
+          </Text>
+        </VStack>
+      )}
+    </ModalBody>
+    <ModalFooter>
+      <Button colorScheme="blue" mr={3} onClick={() => setIsOpen(false)}>
+        Fermer
+      </Button>
+    </ModalFooter>
+  </ModalContent>
+</Modal>
+
 <Box mt={6}>
   <ReactPaginate
     previousLabel={"←"}
@@ -553,5 +598,4 @@ overflow={{ base: "auto", md: "auto" }}>
 </Box>
 );
 };
-
 export default AdminTableau;

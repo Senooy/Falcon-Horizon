@@ -15,6 +15,13 @@ import {
   ButtonGroup,
   Button,
   Flex,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
