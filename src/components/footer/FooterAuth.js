@@ -44,13 +44,13 @@ export default function Footer() {
             fontWeight='700'>
             Falcon Marketing
           </Link>
-          - Un projet 
+          
           <Link
             mx='3px'
             color={textColor}
             href='https://appseed.us'
             target='_blank'>
-            V0.1
+           
           </Link>           
         </Text>
       </Text>

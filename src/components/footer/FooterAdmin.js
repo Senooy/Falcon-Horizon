@@ -45,13 +45,13 @@ export default function Footer() {
             target='_blank'>
             Falcon Marketing
           </Link> 
-          - Un projet 
+          
           <Link
             mx='3px'
             color={textColor}
             href='https://appseed.us'
             target='_blank'>
-            V0.1
+           
           </Link> 
         </Text>
       </Text>

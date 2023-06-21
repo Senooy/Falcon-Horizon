@@ -25,6 +25,11 @@ import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { Input } from "@chakra-ui/react";
+import { Select } from "@chakra-ui/react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import "views/admin/default/components/i18n.js"
+import { useTranslation } from 'react-i18next';
 
 const PER_PAGE = 10;
 
@@ -39,13 +44,23 @@ const AdminTableau = () => {
 };
 
 const Tableau = () => {
-  const periods = ["Semaine", "Mois", "Année"];
   const { colorMode } = useColorMode();
   const { user } = React.useContext(AuthContext);
+  const shouldHideTable = user && user.profileData && user.profileData.admin;
+  const [jsonData, setJsonData] = useState(null);
+  const periods = ["Semaine", "Mois", "Année"];
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
+  // State variable to handle modal open/close state
+  const [isOpen, setIsOpen] = useState(false);
+  // State variable to handle details of the currently selected record
+  const [currentRecord, setCurrentRecord] = useState(null);
+  const { t } = useTranslation(); // Utilisation de la fonction t() pour traduire les termes
+  const handleOpenModal = (record) => {
+    setCurrentRecord(record);
+    setIsOpen(true);
+  }
   const [currentPage, setCurrentPage] = useState(0);
-  const [jsonData, setJsonData] = useState(null);
   const [sortConfig, setSortConfig] = useState({
     key: "CreatedDate",
     ascending: false,
@@ -59,36 +74,54 @@ const Tableau = () => {
 
   const [searchValue, setSearchValue] = useState('');  // NEW STATE FOR SEARCH VALUE
 
-const handleSearchChange = (e) => {
-  setSearchValue(e.target.value);
-};
+  const [selectedMonth, setSelectedMonth] = useState("");
 
-const searchRecords = (records) => {
-  return records.filter((record) => {
-    const {
-      TchProspectName__c,
-      ProspectMobilePhone__c,
-      OrderNumber__c,
-      VendorName__c,
-    } = record;
-    const searchLower = searchValue.toLowerCase();
-    return (
-      (TchProspectName__c &&
-        TchProspectName__c.toLowerCase().includes(searchLower)) ||
-      (ProspectMobilePhone__c &&
-        ProspectMobilePhone__c.toLowerCase().includes(searchLower)) ||
-      (OrderNumber__c && OrderNumber__c.toLowerCase().includes(searchLower)) ||
-      (VendorName__c && VendorName__c.toLowerCase().includes(searchLower))
-    );
-  });
-};
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const openModal = (record) => {
+    setCurrentRecord(record);
+    setIsOpen(true);
+  }
 
 
-useEffect(() => {
-  const filtered = filterRecords(filter.period, filter.status);
-  const searched = searchRecords(filtered);
-  setFilteredRecords(searched);
-}, [records, filter, searchValue]);
+
+  const handleSearchChange = (e) => {
+    setSearchValue(e.target.value);
+  };
+
+  const handleMonthChange = (event) => {
+    setSelectedMonth(event.target.value);
+    const filtered = filterRecords(filter.period, filter.status, filter.hasConnectingDate);
+    setFilteredRecords(filtered);
+  };
+  
+  const handleDateChange = (date) => {
+    setSelectedDate(date);  // Définir la date sélectionnée
+    const filtered = filterRecords(filter.period, filter.status, filter.hasConnectingDate);
+    setFilteredRecords(filtered);
+  };
+  
+
+  const searchRecords = (records) => {
+    return records.filter(record => {
+      const { TchProspectName__c, ProspectMobilePhone__c, OrderNumber__c } = record;
+      const searchLower = searchValue.toLowerCase();
+      return (TchProspectName__c && TchProspectName__c.toLowerCase().includes(searchLower)) ||
+             (ProspectMobilePhone__c && ProspectMobilePhone__c.toLowerCase().includes(searchLower)) ||
+             (OrderNumber__c && OrderNumber__c.toLowerCase().includes(searchLower));
+    });
+  };
+
+  useEffect(() => {
+    const filtered = filterRecords(filter.period, filter.status);
+    const searched = searchRecords(filtered);
+    setFilteredRecords(searched);
+  }, [records, filter, searchValue, selectedMonth, selectedDate]);
+
+  
+  const now = new Date();
+
+  const oneDay = 24 * 60 * 60 * 1000;
 
 
 const fetchData = async () => {
@@ -111,142 +144,206 @@ const fetchData = async () => {
 
 
 
-  const formatDate = (date) => {
-    if (!date) {
-      return "";
+const formatDate = (date, isPaymentDate = false) => {
+  if (!date) {
+    return "";
+  }
+  const d = new Date(date);
+  let month = d.getMonth() + 1;
+  let year = d.getFullYear();
+
+  if (isPaymentDate) {
+    month += 1;
+    if (month > 12) {
+      month = 1; // reset to January
+      year++; // increment year
     }
-    const d = new Date(date);
-    return isNaN(d.getTime())
-      ? ""
-      : `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}/${d.getFullYear()}`;
-  };
+  }
 
-  const sortRecords = (records) => {
-    return records.sort((a, b) => {
-      const dateA = new Date(a[sortConfig.key]);
-      const dateB = new Date(b[sortConfig.key]);
-      if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) {
-        return 0;
-      }
-      if (isNaN(dateA.getTime())) {
-        return sortConfig.ascending ? 1 : -1;
-      }
-      if (isNaN(dateB.getTime())) {
-        return sortConfig.ascending ? -1 : 1;
-      }
-      return sortConfig.ascending ? dateA - dateB : dateB - dateA;
-    });
-  };
+  return isNaN(d.getTime())
+    ? ""
+    : `${d.getDate().toString().padStart(2, "0")}/${month
+        .toString()
+        .padStart(2, "0")}/${year}`;
+};
 
-  const toggleSortDirection = (key) => {
-    setSortConfig((prevConfig) => {
-      return {
-        key: key,
-        ascending: prevConfig.key === key ? !prevConfig.ascending : true,
-      };
-    });
-  };
 
-  const handleCollapseToggle = (rowId) => {
-    if (collapsedRowId === rowId) {
-      setCollapsedRowId(null);
-    } else {
-      setCollapsedRowId(rowId);
+const sortRecords = (records) => {
+  return records.sort((a, b) => {
+    const dateA = new Date(a[sortConfig.key]);
+    const dateB = new Date(b[sortConfig.key]);
+    if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) {
+      return 0;
     }
-  };
+    if (isNaN(dateA.getTime())) {
+      return sortConfig.ascending ? 1 : -1;
+    }
+    if (isNaN(dateB.getTime())) {
+      return sortConfig.ascending ? -1 : 1;
+    }
+    return sortConfig.ascending ? dateA - dateB : dateB - dateA;
+  });
+};
 
-  const statuses = [
-    "ToConfirm",
-    "Validated",
-    "Progress",
-    "Error",
-    "Payed",
-    "EnCoursDeRattrapage", // Ajoutez le statut EnCoursDeRattrapage
-  ];
+const toggleSortDirection = (key) => {
+  setSortConfig((prevConfig) => {
+    return {
+      key: key,
+      ascending: prevConfig.key === key ? !prevConfig.ascending : true,
+    };
+  });
+};
 
-
-
-  const filterRecords = (period, status) => {
-    const now = new Date();
-    const oneDay = 24 * 60 * 60 * 1000;
+const handleCollapseToggle = (rowId) => {
   
-    const filteredByPeriod = records.filter((record) => {
-      const recordDate = new Date(record.CreatedDate);
-      const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
-  
-      switch (period) {
-        case "Semaine":
-          return diffDays <= 7;
-        case "Mois":
-          return diffDays <= 30;
-        case "Année":
-          return diffDays <= 365;
-        default:
-          return true;
-      }
-    });
-  
-    const filteredByStatus =
+  if (collapsedRowId === rowId) {
+    setCollapsedRowId(null);
+  } else {
+    setCollapsedRowId(rowId);
+  }
+
+};
+
+const statuses = [
+  "EnCoursDeRattrapage",
+  "Error",
+  "Validated",
+  "Payed",
+];
+
+
+const filterRecords = (period, status, hasConnectingDate) => {
+  const now = new Date();
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  let filteredByPeriod = records.filter((record) => {
+    const recordDate = new Date(record.CreatedDate);
+    const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
+
+    switch (period) {
+      case "Semaine":
+        return diffDays <= 7;
+      case "Mois":
+        return diffDays <= 30;
+      case "Année":
+        return diffDays <= 365;
+      default:
+        return true;
+    }
+  });
+
+  let filteredByStatus =
     status === "Tous"
       ? filteredByPeriod
-      : filteredByPeriod.filter((record) => record.Status__c === status || record.ConnectionStatus__c === status); // Modifiez cette ligne pour inclure le statut EnCoursDeRattrapage
+      : filteredByPeriod.filter(
+          (record) =>
+            record.Status__c === status || record.ConnectionStatus__c === status
+        );
 
-    return filteredByStatus;
-  };
+  if (hasConnectingDate) {
+    filteredByStatus = filteredByStatus.filter((record) => {
+      if (
+        record.ConnectingDatePlanned__c &&
+        record.ConnectingDatePlanned__c.length > 0
+      ) {
+        const connectingDate = new Date(record.ConnectingDatePlanned__c);
+        const diffDaysConnecting = Math.round(
+          Math.abs((now - connectingDate) / oneDay)
+        );
+        return diffDaysConnecting >= -1 && diffDaysConnecting <= 1;
+      }
+      return false;
+    });
+  }
 
+  if (selectedMonth) {
+    filteredByStatus = filteredByStatus.filter((record) => {
+      if (record.DateOfPayment__c) {
+        const paymentMonth = new Date(record.DateOfPayment__c).getMonth() + 1;
+        return parseInt(selectedMonth) === paymentMonth;
+      }
+      return false;
+    });
+  }
 
-  const handleFilter = (period, status) => {
-    const filtered = filterRecords(period, status);
-    setFilteredRecords(filtered);
-    setFilter({ period, status });
-  };
+  if (selectedDate) {
+    const selectedMonth = selectedDate.getMonth();
+    const selectedYear = selectedDate.getFullYear();
+    
+    filteredByStatus = filteredByStatus.filter((record) => {
+      if (record.DateOfPayment__c) {
+        const paymentDate = new Date(record.DateOfPayment__c);
+        const paymentMonth = paymentDate.getMonth();
+        const paymentYear = paymentDate.getFullYear();
+    
+        // Check if payment year and month matches the selected year and month - 1
+        const isSameYear = selectedYear === paymentYear;
+        const isPreviousMonth = (selectedMonth === 0 && paymentMonth === 11 && !isSameYear) 
+                              || (selectedMonth === paymentMonth + 1 && isSameYear);
   
-  
-
-  useEffect(() => {
-  fetchData();
-  }, [user]);
-  
-  function handlePageClick({ selected: selectedPage }) {
-  setCurrentPage(selectedPage);
+        return isPreviousMonth;
+      }
+      return false;
+    });
   }
   
-  const offset = currentPage * PER_PAGE;
-  
-  const pageCount = Math.ceil(filteredRecords.length / PER_PAGE);
-  
-  const sortedRecords = sortRecords(filteredRecords).map((record) => ({
-  ...record,
-  CreatedDate: formatDate(record.CreatedDate),
-  ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
-  }));
 
-  const bgColor = useColorModeValue("white", "gray.700");
+  return filteredByStatus;
+};
 
-  const getRowColors = (status) => {
-    const lightColors = {
-      ToConfirm: "rgba(0, 108, 254, 0.03)",
-      Validated: "rgba(3, 255, 0, 0.3)",
-      Progress: "rgba(3, 255, 0, 0.1)",
-      Error: "rgba(255, 0, 0, 0.3)",
-      Payed: "rgba(8, 254, 0, 0.91)",
-    };
-  
-    const darkColors = {
-      ToConfirm: "rgba(0, 108, 254, 0.1)",
-      Validated: "rgba(3, 255, 0, 0.4)",
-      Progress: "rgba(3, 255, 0, 0.2)",
-      Error: "rgba(255, 0, 0, 0.4)",
-      Payed: "rgba(8, 254, 0, 0.91)",
-    };
-  
-    return {
-      light: lightColors[status] || "",
-      dark: darkColors[status] || "",
-    };
+
+const handleFilter = (period, status, hasConnectingDate) => {
+  const filtered = filterRecords(period, status, hasConnectingDate);
+  setFilteredRecords(filtered);
+  setFilter({ period, status });
+};
+
+useEffect(() => {
+fetchData();
+}, [user]);
+
+function handlePageClick({ selected: selectedPage }) {
+setCurrentPage(selectedPage);
+}
+
+const offset = currentPage * PER_PAGE;
+
+const pageCount = Math.ceil(filteredRecords.length / PER_PAGE);
+
+// ...
+const sortedRecords = sortRecords(filteredRecords).map((record) => ({
+...record,
+CreatedDate: formatDate(record.CreatedDate),
+ConnectingDatePlanned__c: formatDate(record.ConnectingDatePlanned__c),
+DateOfPayment__c: formatDate(record.DateOfPayment__c, true), // ici on passe true pour ajouter un mois
+}));
+// ...
+
+
+const bgColor = useColorModeValue("white", "gray.700");
+
+const getRowColors = (status) => {
+  const lightColors = {
+    ToConfirm: "rgba(0, 108, 254, 0.03)",
+    Validated: "rgba(3, 255, 0, 0.3)",
+    Progress: "rgba(3, 255, 0, 0.1)",
+    Error: "rgba(255, 0, 0, 0.3)",
+    Payed: "rgba(8, 254, 0, 0.91)",
   };
+
+  const darkColors = {
+    ToConfirm: "rgba(0, 108, 254, 0.1)",
+    Validated: "rgba(3, 255, 0, 0.4)",
+    Progress: "rgba(3, 255, 0, 0.2)",
+    Error: "rgba(255, 0, 0, 0.4)",
+    Payed: "rgba(8, 254, 0, 0.91)",
+  };
+
+  return {
+    light: lightColors[status] || "",
+    dark: darkColors[status] || "",
+  };
+};
   
 
   
@@ -271,7 +368,10 @@ const fetchData = async () => {
   value={searchValue}
   onChange={handleSearchChange}
   mb={4}
+  bg={colorMode === "dark" ? "gray.800" : "gray.100"} // Champs sombres en mode sombre
+  color={colorMode === "dark" ? "white" : "black"} // Texte blanc en mode sombre
 />
+
       <Link to="/admin/statistiques">
        <Button
         leftIcon={<MdBarChart />}
@@ -280,12 +380,9 @@ const fetchData = async () => {
         mb={4}
        >
       Statistiques
-      
       </Button>
-      
 
   </Link>
-  
   <Box mb={4}>
 
   
@@ -313,43 +410,44 @@ const fetchData = async () => {
   </Box>
 
   <Box mb={4}>
-      <ButtonGroup
-        isAttached
-        spacing={20}
-        width={{ base: "100%", md: "auto" }}
-        mb={4}
-      >
-        <Button
-          size="md"
-          colorScheme={filter.status === "Tous" ? "brand" : "gray"}
-          onClick={() => handleFilter(filter.period, "Tous")}
-          px={10}
-        >
-          Tous
-        </Button>
-        {statuses.map((status) => (
-          <Button
-            key={status}
-            size="md"
-            colorScheme={filter.status === status ? "blue" : "gray"}
-            onClick={() => handleFilter(filter.period, status)}
-            px={10}
-          >
-            {status}
-          </Button>
-        ))}
-        <Button // Ajoutez un nouveau bouton pour le statut EnCoursDeRattrapage
-          size="md"
-          colorScheme={filter.status === "EnCoursDeRattrapage" ? "blue" : "gray"}
-          onClick={() => handleFilter(filter.period, "EnCoursDeRattrapage")}
-          px={10}
-        >
-          EnCoursDeRattrapage
-        </Button>
-      </ButtonGroup>
+  <ButtonGroup
+  isAttached
+  spacing={20}
+  width={{ base: "100%", md: "auto" }}
+  mb={4}
+>
+  {statuses.map((status) => (
+    <Button
+      key={status}
+      size="md"
+      colorScheme={filter.status === status ? "blue" : "gray"}
+      onClick={() => handleFilter(filter.period, status)}
+      px={10}
+    >
+       {t(status)}
+    </Button>
+    
+    
+  ))}
+
+</ButtonGroup>
+
+  <Box mb={4}
+  spacing={20}
+  >
+     <p>Facturation :</p>
+  <DatePicker
+  selected={selectedDate}  // La date actuellement sélectionnée
+  onChange={handleDateChange}  // Le gestionnaire pour changer la date
+  dateFormat="MM/yyyy"  // Le format de la date
+  showMonthYearPicker  // Pour afficher le sélecteur de mois/année
+  placeholderText="Choisir une date"  // Le texte affiché lorsque rien n'est sélectionné
+/>
+  </Box>
     </Box>
 
 </Flex>
+
 
   
 <Table variant="simple"
@@ -357,13 +455,13 @@ overflow={{ base: "auto", md: "auto" }}>
   <Thead>
     <Tr>
       <Th>Détails</Th>
+      <Th>Vendeur</Th>
       <Th
         onClick={() => toggleSortDirection("CreatedDate")}
         style={{ cursor: "pointer" }}
       >
         Date de la vente
       </Th>
-      <Th>Vendeur</Th>
       <Th>Nom</Th>
       <Th>Date de raccordement</Th>
       <Th>Statut</Th>

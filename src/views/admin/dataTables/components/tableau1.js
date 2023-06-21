@@ -41,10 +41,9 @@ const PER_PAGE = 100;
 
 const Tableau = () => {
   const { colorMode } = useColorMode();
-  const { t } = useTranslation(); // Utilisation de la fonction t() pour traduire les termes
   const { user } = React.useContext(AuthContext);
   const shouldHideTable = user && user.profileData && user.profileData.admin;
-
+  const [jsonData, setJsonData] = useState(null);
   const periods = ["Semaine", "Mois", "Année"];
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
@@ -52,6 +51,7 @@ const Tableau = () => {
   const [isOpen, setIsOpen] = useState(false);
   // State variable to handle details of the currently selected record
   const [currentRecord, setCurrentRecord] = useState(null);
+  const { t } = useTranslation(); // Utilisation de la fonction t() pour traduire les termes
   const handleOpenModal = (record) => {
     setCurrentRecord(record);
     setIsOpen(true);
