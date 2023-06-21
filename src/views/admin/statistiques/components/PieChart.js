@@ -1,22 +1,15 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  ButtonGroup,
-  Button,
-  Flex,
-  Text,
-  useColorMode,
-} from "@chakra-ui/react";
+import { Box, Button, ButtonGroup, Text, useColorMode, Heading } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
-import RaccordementTable from './StatusPieChart';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-const Tableau = () => {
+const ContratsJournaliers = () => {
   const { user } = React.useContext(AuthContext);
   const { colorMode } = useColorMode();
   const [records, setRecords] = useState([]);
-  const [filteredRecords, setFilteredRecords] = useState([]);
-  const [filter, setFilter] = useState("Tous");
+  const [chartData, setChartData] = useState([]);
+  const [period, setPeriod] = useState("Tous");
 
   const fetchData = async () => {
     try {
@@ -25,110 +18,105 @@ const Tableau = () => {
           `${user.profileData.salesCode}`
       );
       setRecords(data.records);
-      setFilteredRecords(data.records);
+      prepareChartData(data.records, period);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleFilter = (filter) => {
-    const now = new Date();
-    let filtered = [];
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <Box bg="white" p={2} borderWidth={1} borderRadius="md">
+          <Text color="black" fontWeight="bold">{`Date : ${label}`}</Text>
+          <Text color="black">{`Contrats : ${payload[0].value}`}</Text>
+        </Box>
+      );
+    }
+    return null;
+  };
 
-    if (filter === "Tous") {
-      filtered = records;
-    } else {
-      const oneDay = 24 * 60 * 60 * 1000;
+  const prepareChartData = (records, period) => {
+    let filteredRecords = [...records];
 
-      switch (filter) {
-        
-    
+
+    if (period !== "Tous") {
+      const now = new Date();
+      let periodStart = new Date();
+      switch (period) {
+        case "Semaine":
+          periodStart.setDate(now.getDate() - 7);
+          break;
         case "Mois":
-          filtered = records.filter((record) => {
-            const recordDate = new Date(record.CreatedDate);
-            const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
-            return diffDays <= 30;
-          });
+          periodStart.setMonth(now.getMonth() - 1);
           break;
-    
         case "Année":
-          filtered = records.filter((record) => {
-            const recordDate = new Date(record.CreatedDate);
-            const diffDays = Math.round(Math.abs((now - recordDate) / oneDay));
-            return diffDays <= 365;
-          });
+          periodStart.setFullYear(now.getFullYear() - 1);
           break;
-    
         default:
           break;
       }
-    }
-    
-    setFilteredRecords(filtered);
-    setFilter(filter);
 
+      filteredRecords = records.filter((record) => new Date(record.CreatedDate) >= periodStart);
+    }
+
+
+    let obj = {};
+    filteredRecords.forEach((record) => {
+      const date = new Date(record.CreatedDate);
+      const dateString = date.toLocaleDateString('fr-FR');  // updated here
+
+      if (obj[dateString]) {
+        obj[dateString]++;
+      } else {
+        obj[dateString] = 1;
+      }
+    });
+
+    const arr = Object.keys(obj).map((key) => ({
+      date: key,
+      count: obj[key],
+    }));
+
+    setChartData(arr);
   };
 
   useEffect(() => {
     fetchData();
-  }, [user]);
+  }, [period]);
 
-  const calculateTauxRaccordement = (records) => {
-    const raccordOK = records.filter(record => record.ConnectionStatus__c === "RaccordOK").length;
-    const payedValidated = records.filter(record => ["Payed", "Validated"].includes(record.Status__c)).length;
-
-    if (payedValidated === 0) {
-      return 0;
-    }
-    return (raccordOK / payedValidated) * 100;
+  const handlePeriodChange = (newPeriod) => {
+    setPeriod(newPeriod);
   };
 
-  const tauxRaccordement = calculateTauxRaccordement(filteredRecords);
-
-  const bgColor = { light: "white", dark: "gray.700" };
-  const textColor = { light: "black", dark: "white" };
-
   return (
-    <Flex
-      direction="column"
-      alignItems="center"
-      bgColor={bgColor[colorMode]}
-      borderRadius="20px"
-    >
-      <Text
-        fontSize="2xl"
-        fontWeight="bold"
-        mb={4}
-        mt={10}
-        color={textColor[colorMode]}
-      >
-        Taux de raccordement
-      </Text>
-
-      <RaccordementTable data={filteredRecords} tauxRaccordement={tauxRaccordement} />
-      <ButtonGroup isAttached mt={10} mb={4}>
-        <Button
-          colorScheme={filter === "Tous" ? "blue" : "gray"}
-          onClick={() => handleFilter("Tous")}
-        >
-          Tous
-        </Button>
-       
-        <Button
-          colorScheme={filter === "Mois" ? "blue" : "gray"}
-          onClick={() => handleFilter("Mois")}
-        >
-          Mois
-        </Button>
-        <Button
-          colorScheme={filter === "Année" ? "blue" : "gray"}
-          onClick={() => handleFilter("Année")}
-        >
-          Année
-        </Button>
+    <Box p={5} boxShadow="xl" bg="white" borderRadius="md">
+      <Heading size="lg" mb={5}>Vos ventes journalières</Heading>
+      <ResponsiveContainer width="100%" height={500}>
+        <LineChart data={chartData}>
+          <Line type="monotone" dataKey="count" stroke="#1D3E5E" strokeWidth={3} dot={{ r: 5 }} />
+          <CartesianGrid stroke="#ccc" strokeDasharray="5 5" strokeOpacity={0.5} />
+          <XAxis dataKey="date" tick={{ fontSize: 16, fontWeight: 'bold' }} />
+          <YAxis tick={{ fontSize: 16, fontWeight: 'bold' }} />
+          <Tooltip 
+            contentStyle={{ fontSize: '16px', fontWeight: 'bold' }}
+            itemStyle={{ color: '#1D3E5E' }} 
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <ButtonGroup mt={5}>
+        {["Tous", "Semaine", "Mois", "Année"].map((p) => (
+          <Button
+            key={p}
+            colorScheme={period === p ? "blue" : "gray"}
+            onClick={() => handlePeriodChange(p)}
+          >
+            {p}
+          </Button>
+        ))}
       </ButtonGroup>
-    </Flex>
+    </Box>
   );
 };
 
-export default Tableau;
+export default ContratsJournaliers;

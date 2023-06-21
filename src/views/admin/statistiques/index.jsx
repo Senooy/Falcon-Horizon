@@ -33,8 +33,7 @@ import {
 } from "@chakra-ui/react";
 
 import React, { useEffect } from "react";
-
-import Tableau from "./components/PieChart";
+import ContratsJournaliers from "./components/PieChart";
 
 
 export default function UserReports() {
@@ -45,8 +44,8 @@ export default function UserReports() {
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
       <SimpleGrid columns={{ base: 1, md: 1, xl: 1 }} gap="20px" mb="20px">
-        
-        <SimpleGrid columns={{ base: 1, md: 2, xl: 2 }} gap="20px"><Tableau /></SimpleGrid>
+        <ContratsJournaliers />
+        <SimpleGrid columns={{ base: 1, md: 2, xl: 2 }} gap="20px"></SimpleGrid>
       </SimpleGrid>
       <SimpleGrid
         columns={{ base: 1, md: 1, xl: 1 }}
