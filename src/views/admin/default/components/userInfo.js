@@ -205,6 +205,7 @@ const handleCollapseToggle = (rowId) => {
 };
 
 const statuses = [
+  "Tous",
   "EnCoursDeRattrapage",
   "Error",
   "Validated",
@@ -292,11 +293,12 @@ const filterRecords = (period, status, hasConnectingDate) => {
 };
 
 
-const handleFilter = (period, status, hasConnectingDate) => {
+const handleFilter = (period, status = "Tous", hasConnectingDate) => {
   const filtered = filterRecords(period, status, hasConnectingDate);
   setFilteredRecords(filtered);
   setFilter({ period, status });
 };
+
 
 useEffect(() => {
 fetchData();
@@ -410,12 +412,8 @@ const getRowColors = (status) => {
   </Box>
 
   <Box mb={4}>
-  <ButtonGroup
-  isAttached
-  spacing={20}
-  width={{ base: "100%", md: "auto" }}
-  mb={4}
->
+    
+  <ButtonGroup isAttached spacing={20} width={{ base: "100%", md: "auto" }} mb={4}>
   {statuses.map((status) => (
     <Button
       key={status}
@@ -426,10 +424,7 @@ const getRowColors = (status) => {
     >
        {t(status)}
     </Button>
-    
-    
   ))}
-
 </ButtonGroup>
 
   <Box mb={4}
