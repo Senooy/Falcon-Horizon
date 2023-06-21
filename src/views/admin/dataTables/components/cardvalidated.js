@@ -68,6 +68,14 @@ const ContratsValides = () => {
         return false;
     }).length;
 
+    const contratsDuMois = records.filter(record => {
+        if (record.CreatedDate) {
+            const recordDate = new Date(record.CreatedDate).getTime();
+            return recordDate >= startOfMonth && recordDate <= endOfMonth;
+        }
+        return false;
+    }).length;
+
     if (isLoading) {
         return <Spinner />;
     }
@@ -84,40 +92,57 @@ const ContratsValides = () => {
     return (
         <Stack spacing={4}>
             <Heading size="xl" textAlign="center">Votre mois de production</Heading>
-            <Flex direction="row" justify="space-between">
+            <Flex direction={{ base: "column", md: "row" }} justify="space-between" flexWrap="wrap">
                 <Box 
                     borderWidth="1px" 
                     borderRadius="lg" 
-                    padding="10px"
+                    padding="5px"
                     backgroundColor={bgColor}
-                    width="45%"
-                    height="150px"
+                    width={{ base: "100%", md: "20%" }}
+                    height="75px"
                     display="flex"
                     flexDirection="column"
                     justifyContent="center"
                     alignItems="center"
+                    marginBottom={{ base: "1rem", md: "0" }}
                 >
-                    <Heading size="lg">Raccordés</Heading>
-                    <Text fontSize="4xl">{contratsValides}</Text>
+                    <Heading size="md">Raccordés</Heading>
+                    <Text fontSize="2xl">{contratsValides}</Text>
                 </Box>
                 <Box 
                     borderWidth="1px" 
                     borderRadius="lg" 
-                    padding="10px"
+                    padding="5px"
                     backgroundColor={bgColor}
-                    width="45%"
-                    height="150px"
+                    width={{ base: "100%", md: "20%" }}
+                    height="75px"
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="center"
+                    alignItems="center"
+                    marginBottom={{ base: "1rem", md: "0" }}
+                >
+                    <Heading size="md">En cours</Heading>
+                    <Text fontSize="2xl">{contratsEnCours}</Text>
+                </Box>
+                <Box 
+                    borderWidth="1px" 
+                    borderRadius="lg" 
+                    padding="5px"
+                    backgroundColor={bgColor}
+                    width={{ base: "100%", md: "20%" }}
+                    height="75px"
                     display="flex"
                     flexDirection="column"
                     justifyContent="center"
                     alignItems="center"
                 >
-                    <Heading size="lg">En cours</Heading>
-                    <Text fontSize="4xl">{contratsEnCours}</Text>
+                    <Heading size="md">Contrats signés</Heading>
+                    <Text fontSize="2xl">{contratsDuMois}</Text>
                 </Box>
             </Flex>
         </Stack>
-    );
+    );    
 };
 
 export default UserContrats;
