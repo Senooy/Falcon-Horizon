@@ -22,6 +22,8 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
+  Radio,
+  RadioGroup,
 } from "@chakra-ui/react";
 import { FaRedo } from 'react-icons/fa';
 import axios from "axios";
@@ -375,88 +377,68 @@ const getRowColors = (status) => {
 
       <div style={{ marginTop: "60px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
-      <Input 
-  placeholder="Recherche..."
-  value={searchValue}
-  onChange={handleSearchChange}
-  mb={4}
-  bg={colorMode === "dark" ? "gray.800" : "gray.100"} // Champs sombres en mode sombre
-  color={colorMode === "dark" ? "white" : "black"} // Texte blanc en mode sombre
-/>
+  <Input 
+    placeholder="Recherche..."
+    value={searchValue}
+    onChange={handleSearchChange}
+    mb={4}
+    bg={colorMode === "dark" ? "gray.800" : "gray.100"} // Champs sombres en mode sombre
+    color={colorMode === "dark" ? "white" : "black"} // Texte blanc en mode sombre
+  />
 
-      <Link to="/admin/statistiques">
-       <Button
-        leftIcon={<MdBarChart />}
-        colorScheme="brand"
-        variant="solid"
-        mb={4}
-       >
-      Statistiques
-      </Button>
-
+  <Link to="/admin/statistiques">
+    <Button
+      leftIcon={<MdBarChart />}
+      colorScheme="brand"
+      variant="solid"
+      mb={4}
+    >
+    Statistiques
+    </Button>
   </Link>
-  <Box mb={4}>
-
   
-
-    <ButtonGroup isAttached>
-      <Button
-        size="md"
-        colorScheme={filter.period === "Tous" ? "brand" : "gray"}
-        onClick={() => handleFilter("Tous", filter.status)}
-        px={10}
-      >
-        Tous
-      </Button>
+  <Box mb={4}>
+    <Text fontWeight="bold" mb={2}>Période :</Text>
+    <RadioGroup 
+      onChange={(value) => handleFilter(value, filter.status)} 
+      value={filter.period}
+    >
+      <Radio value="Tous" mr={2}>Tous</Radio>
       {periods.map((period) => (
-        <Button
-          key={period}
-          size="md"
-          colorScheme={filter.period === period ? "brand" : "gray"}
-          onClick={() => handleFilter(period, filter.status)}
-        >
-          {period}
-        </Button>
+        <Radio key={period} value={period} mr={2}>{period}</Radio>
       ))}
-    </ButtonGroup>
+    </RadioGroup>
   </Box>
 
   <Box mb={4}>
-
-  <ButtonGroup isAttached spacing={20} width={{ base: "100%", md: "auto" }} mb={4}>
-  {statuses.map((status) => (
-    <Button
-      key={status}
-      size="md"
-      colorScheme={filter.status === status ? "blue" : "gray"}
-      onClick={() => handleFilter(filter.period, status)}
-      px={10}
+    <Text fontWeight="bold" mb={2}>Statut :</Text>
+    <RadioGroup 
+      onChange={(value) => handleFilter(filter.period, value)} 
+      value={filter.status}
     >
-       {t(status)}
-    </Button>
-  ))}
-</ButtonGroup>
+      {statuses.map((status) => (
+        <Radio key={status} value={status} mr={2}>{t(status)}</Radio>
+      ))}
+    </RadioGroup>
+  </Box>
 
-<Box mb={4} spacing={20}>
-  <Text fontWeight="bold">Facturation :</Text>
-  <Flex direction="row" alignItems="center">
-    <DatePicker
-      selected={selectedDate}
-      onChange={handleDateChange}
-      dateFormat="MM/yyyy"
-      showMonthYearPicker
-      placeholderText="Choisir une date"
-    />
-    <Button onClick={resetDatePicker} variant="outline" marginLeft={2}>
-      <MdOutlineRotateLeft />
-    </Button>
-  </Flex>
-</Box>
-
-
-    </Box>
-
+  <Box mb={4} spacing={20}>
+    <Text fontWeight="bold">Facturation :</Text>
+    <Flex direction="row" alignItems="center">
+      <DatePicker
+        selected={selectedDate}
+        onChange={handleDateChange}
+        dateFormat="MM/yyyy"
+        showMonthYearPicker
+        placeholderText="Choisir une date"
+      />
+      <Button onClick={resetDatePicker} variant="outline" marginLeft={2}>
+        <MdOutlineRotateLeft />
+      </Button>
+    </Flex>
+  </Box>
 </Flex>
+
 
 
   

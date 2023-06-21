@@ -22,6 +22,8 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
+  Radio,
+  RadioGroup,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
@@ -29,6 +31,7 @@ import ReactPaginate from "react-paginate";
 import "./pagination.css";
 import { FaAngleDown } from "react-icons/fa";
 import { MdBarChart } from "react-icons/md";
+import { MdOutlineRotateLeft } from "react-icons/md"
 import { Link } from "react-router-dom";
 import { Input } from "@chakra-ui/react";
 import { Select } from "@chakra-ui/react";
@@ -78,6 +81,10 @@ const Tableau = () => {
     setCurrentRecord(record);
     setIsOpen(true);
   }
+
+  const resetDatePicker = () => {
+    setSelectedDate(null); // Clear the selected date
+  };
 
 
 
@@ -194,6 +201,7 @@ const Tableau = () => {
   };
 
   const statuses = [
+    "Tous",
     "EnCoursDeRattrapage",
     "Error",
     "Validated",
@@ -354,90 +362,69 @@ const sortedRecords = sortRecords(filteredRecords).map((record) => ({
 
       <div style={{ marginTop: "20px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
-      <Input 
-  placeholder="Recherche..."
-  value={searchValue}
-  onChange={handleSearchChange}
-  mb={4}
-  bg={colorMode === "dark" ? "gray.800" : "gray.100"} // Champs sombres en mode sombre
-  color={colorMode === "dark" ? "white" : "black"} // Texte blanc en mode sombre
-/>
+  <Input 
+    placeholder="Recherche..."
+    value={searchValue}
+    onChange={handleSearchChange}
+    mb={4}
+    bg={colorMode === "dark" ? "gray.800" : "gray.100"} // Champs sombres en mode sombre
+    color={colorMode === "dark" ? "white" : "black"} // Texte blanc en mode sombre
+  />
 
-      <Link to="/admin/statistiques">
-       <Button
-        leftIcon={<MdBarChart />}
-        colorScheme="brand"
-        variant="solid"
-        mb={4}
-       >
-      Statistiques
-      </Button>
-
-  </Link>
-  <Box mb={4}>
-
-  
-
-    <ButtonGroup isAttached>
-      <Button
-        size="md"
-        colorScheme={filter.period === "Tous" ? "brand" : "gray"}
-        onClick={() => handleFilter("Tous", filter.status)}
-        px={10}
-      >
-        Tous
-      </Button>
-      {periods.map((period) => (
-        <Button
-          key={period}
-          size="md"
-          colorScheme={filter.period === period ? "brand" : "gray"}
-          onClick={() => handleFilter(period, filter.status)}
-        >
-          {period}
-        </Button>
-      ))}
-    </ButtonGroup>
-  </Box>
-
-  <Box mb={4}>
-  <ButtonGroup
-  isAttached
-  spacing={20}
-  width={{ base: "100%", md: "auto" }}
-  mb={4}
->
-  {statuses.map((status) => (
+  <Link to="/admin/statistiques">
     <Button
-      key={status}
-      size="md"
-      colorScheme={filter.status === status ? "blue" : "gray"}
-      onClick={() => handleFilter(filter.period, status)}
-      px={10}
+      leftIcon={<MdBarChart />}
+      colorScheme="brand"
+      variant="solid"
+      mb={4}
     >
-       {t(status)}
+    Statistiques
     </Button>
-    
-    
-  ))}
-
-</ButtonGroup>
-
-  <Box mb={4}
-  spacing={20}
-  >
-     <p>Facturation :</p>
-  <DatePicker
-  selected={selectedDate}  // La date actuellement sélectionnée
-  onChange={handleDateChange}  // Le gestionnaire pour changer la date
-  dateFormat="MM/yyyy"  // Le format de la date
-  showMonthYearPicker  // Pour afficher le sélecteur de mois/année
-  placeholderText="Choisir une date"  // Le texte affiché lorsque rien n'est sélectionné
-/>
+  </Link>
+  
+  <Box mb={4}>
+    <Text fontWeight="bold" mb={2}>Période :</Text>
+    <RadioGroup 
+      onChange={(value) => handleFilter(value, filter.status)} 
+      value={filter.period}
+    >
+      <Radio value="Tous" mr={2}>Tous</Radio>
+      {periods.map((period) => (
+        <Radio key={period} value={period} mr={2}>{period}</Radio>
+      ))}
+    </RadioGroup>
   </Box>
-    </Box>
 
+  <Box mb={4}>
+    <Text fontWeight="bold" mb={2}>Statut :</Text>
+    <RadioGroup 
+      onChange={(value) => handleFilter(filter.period, value)} 
+      value={filter.status}
+    >
+      {statuses.map((status) => (
+        <Radio key={status} value={status} mr={2}>{t(status)}</Radio>
+      ))}
+    </RadioGroup>
+  </Box>
+
+  <Box mb={4} spacing={20}>
+    <Text fontWeight="bold">Facturation :</Text>
+    <Flex direction="row" alignItems="center">
+      <DatePicker
+        selected={selectedDate}
+        onChange={handleDateChange}
+        dateFormat="MM/yyyy"
+        showMonthYearPicker
+        placeholderText="Choisir une date"
+      />
+      <Button onClick={resetDatePicker} variant="outline" marginLeft={2}>
+        <MdOutlineRotateLeft />
+      </Button>
+    </Flex>
+  </Box>
 </Flex>
+
+
 
   
 <Table variant="simple"
