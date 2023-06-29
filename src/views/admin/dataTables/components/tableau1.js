@@ -449,14 +449,11 @@ const sortedRecords = sortRecords(filteredRecords).map((record) => ({
   </Box>
 
   <Box mb={4}>
-<Select
-  value={connectionStatus}
-  onChange={(e) => handleConnectionStatusChange(e.target.value)}
->
-  <option value="Tous">Tous</option>
-  <option value="Raccordé">Raccordé</option>
-  <option value="Non raccordé">Non raccordé</option>
-</Select>
+  <RadioGroup value={connectionStatus} onChange={(value) => handleConnectionStatusChange(value)}>
+  <Radio value="Tous" mr={2}>Tous</Radio>
+  <Radio value="Raccordé" mr={2}>Raccordé</Radio>
+  <Radio value="Non raccordé" mr={2}>Non raccordé</Radio>
+</RadioGroup>
 </Box>
 
 
