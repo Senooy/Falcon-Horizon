@@ -71,6 +71,8 @@ const Tableau = () => {
     return colorMode === "light" ? colors.light : colors.dark;
   };
 
+  const [salesCount, setSalesCount] = useState(0);
+
   const [searchValue, setSearchValue] = useState('');  // NEW STATE FOR SEARCH VALUE
 
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -118,8 +120,11 @@ const Tableau = () => {
   useEffect(() => {
     const filtered = filterRecords(filter.period, filter.status);
     const searched = searchRecords(filtered);
+    setSalesCount(filtered.length);
     setFilteredRecords(searched);
   }, [records, filter, searchValue, selectedMonth, selectedDate]);
+
+  
 
   
   const now = new Date();
@@ -362,6 +367,9 @@ const sortedRecords = sortRecords(filteredRecords).map((record) => ({
 
       <div style={{ marginTop: "20px" }}></div>
       <Flex direction={{ base: "column", md: "column" }} w="100%" alignItems={{ base: 'left', md: 'left' }}>
+      <Flex justify="space-between" align="center" mb={4}>
+        <Text fontWeight="bold" fontSize="lg">Nombre de ventes : {salesCount}</Text>
+      </Flex>
   <Input 
     placeholder="Recherche..."
     value={searchValue}
