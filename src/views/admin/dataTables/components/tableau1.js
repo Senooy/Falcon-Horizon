@@ -214,6 +214,30 @@ const Tableau = () => {
   ];
   
 
+  const [connectionStatus, setConnectionStatus] = useState("Tous");
+
+  const handleConnectionStatusChange = (value) => {
+    setConnectionStatus(value);
+
+    const filteredByConnectionStatus = records.filter((record) => {
+      if (value === 'Tous') { // si l'utilisateur a sélectionné 'Tous', retournez tous les enregistrements
+        return true;
+      } else { // sinon, filtrez les enregistrements en fonction de la valeur de ConnectionStatus__c
+        // Mise à jour des valeurs de contrôle
+        if(value === 'Raccordé'){
+          return record.ConnectionStatus__c === 'RaccordOK';
+        } else if(value === 'Non raccordé') {
+          return record.ConnectionStatus__c === 'RaccordKO';
+        }
+        return false;
+      }
+    });
+
+    setFilteredRecords(filteredByConnectionStatus);
+  }
+
+  
+
   const filterRecords = (period, status, hasConnectingDate) => {
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
@@ -233,14 +257,23 @@ const Tableau = () => {
           return true;
       }
     });
+
+    
   
     let filteredByStatus =
-      status === "Tous"
-        ? filteredByPeriod
-        : filteredByPeriod.filter(
-            (record) =>
-              record.Status__c === status || record.ConnectionStatus__c === status
-          );
+    status === "Tous"
+      ? filteredByPeriod
+      : filteredByPeriod.filter((record) => {
+          if (status === "RaccordOK") {
+            return record.ConnectionStatus__c === "Raccordé";
+          } else if (status === "RaccordKO") {
+            return record.ConnectionStatus__c === "Non raccordé";
+          } else {
+            return record.Status__c === status;
+          }
+        });
+
+
   
     if (hasConnectingDate) {
       filteredByStatus = filteredByStatus.filter((record) => {
@@ -414,6 +447,18 @@ const sortedRecords = sortRecords(filteredRecords).map((record) => ({
       ))}
     </RadioGroup>
   </Box>
+
+  <Box mb={4}>
+<Select
+  value={connectionStatus}
+  onChange={(e) => handleConnectionStatusChange(e.target.value)}
+>
+  <option value="Tous">Tous</option>
+  <option value="Raccordé">Raccordé</option>
+  <option value="Non raccordé">Non raccordé</option>
+</Select>
+</Box>
+
 
   <Box mb={4} spacing={20}>
     <Text fontWeight="bold">Facturation :</Text>
