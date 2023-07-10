@@ -53,15 +53,33 @@ const ContratsValides = () => {
     const endOfMonth = new Date(currentYear, currentMonth, 0).getTime();
 
     const contratsValides = records.filter(record => {
-        if (record.ConnectionStatus__c === 'RaccordOK' && record.ConnectionDate__c) {
+        if (record.ConnectionStatus__c === 'RaccordOK' && record.ConnectionDate__c && record.ConnectionStatus__c == 'Validated') {
             const recordDate = new Date(record.ConnectionDate__c).getTime();
             return recordDate >= startOfMonth && recordDate <= endOfMonth;
         }
         return false;
     }).length;
 
+    const contratsPremium = records.filter(record => {
+        if (record.FamilyOffer__c === 'PREMIUM' && record.CreationDate__c && record.ConnectionStatus__c == 'Validated') {
+            const recordDate = new Date(record.CreationDate__c).getTime();
+            return recordDate >= startOfMonth && recordDate <= endOfMonth;
+        }
+        return false;
+    }).length;
+
+    const contratsMobile = records.filter(record => {
+        if (record.OfferName__c.includes('Mobile') && record.CreationDate__c && record.ConnectionStatus__c == 'Validated') {
+            const recordDate = new Date(record.CreationDate__c).getTime();
+            return recordDate >= startOfMonth && recordDate <= endOfMonth;
+        }
+        return false;
+    }).length;
+    
+
+
     const contratsEnCours = records.filter(record => {
-        if (record.ConnectionStatus__c === 'EnCours' && record.CreationDate__c) {
+        if (record.ConnectionStatus__c === 'EnCours' && record.CreationDate__c && record.ConnectionStatus__c == 'Validated') {
             const recordDate = new Date(record.CreationDate__c).getTime();
             return recordDate >= startOfMonth && recordDate <= endOfMonth;
         }
@@ -69,7 +87,7 @@ const ContratsValides = () => {
     }).length;
 
     const contratsDuMois = records.filter(record => {
-        if (record.CreatedDate) {
+        if (record.CreatedDate && record.ConnectionStatus__c == 'Validated') {
             const recordDate = new Date(record.CreatedDate).getTime();
             return recordDate >= startOfMonth && recordDate <= endOfMonth;
         }
@@ -90,58 +108,92 @@ const ContratsValides = () => {
     }
 
     return (
-        <Stack spacing={4}>
-            <Heading size="xl" textAlign="center">Votre mois de production</Heading>
-            <Flex direction={{ base: "column", md: "row" }} justify="space-between" flexWrap="wrap">
-                <Box 
-                    borderWidth="1px" 
-                    borderRadius="lg" 
-                    padding="5px"
-                    backgroundColor={bgColor}
-                    width={{ base: "100%", md: "20%" }}
-                    height="75px"
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                    marginBottom={{ base: "1rem", md: "0" }}
-                >
-                    <Heading size="md">Raccordés</Heading>
-                    <Text fontSize="2xl">{contratsValides}</Text>
-                </Box>
-                <Box 
-                    borderWidth="1px" 
-                    borderRadius="lg" 
-                    padding="5px"
-                    backgroundColor={bgColor}
-                    width={{ base: "100%", md: "20%" }}
-                    height="75px"
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                    marginBottom={{ base: "1rem", md: "0" }}
-                >
-                    <Heading size="md">En cours</Heading>
-                    <Text fontSize="2xl">{contratsEnCours}</Text>
-                </Box>
-                <Box 
-                    borderWidth="1px" 
-                    borderRadius="lg" 
-                    padding="5px"
-                    backgroundColor={bgColor}
-                    width={{ base: "100%", md: "20%" }}
-                    height="75px"
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                >
-                    <Heading size="md">Contrats signés</Heading>
-                    <Text fontSize="2xl">{contratsDuMois}</Text>
-                </Box>
-            </Flex>
-        </Stack>
+<Stack spacing={4}>
+  <Heading size="xl" textAlign="center">Votre mois de production</Heading>
+  <Flex direction={{ base: "column", md: "row" }} justify="space-between" flexWrap="wrap">
+    <Box 
+      borderWidth="1px" 
+      borderRadius="lg" 
+      padding="5px"
+      backgroundColor={bgColor}
+      width={{ base: "100%", md: "18%" }}
+      height="60px"
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+      marginBottom={{ base: "1rem", md: "0" }}
+    >
+      <Heading size="md">Raccordés</Heading>
+      <Text fontSize="lg">{contratsValides}</Text>
+    </Box>
+    <Box 
+      borderWidth="1px" 
+      borderRadius="lg" 
+      padding="5px"
+      backgroundColor={bgColor}
+      width={{ base: "100%", md: "18%" }}
+      height="60px"
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+      marginBottom={{ base: "1rem", md: "0" }}
+    >
+      <Heading size="md">En cours</Heading>
+      <Text fontSize="lg">{contratsEnCours}</Text>
+    </Box>
+    <Box 
+      borderWidth="1px" 
+      borderRadius="lg" 
+      padding="5px"
+      backgroundColor={bgColor}
+      width={{ base: "100%", md: "18%" }}
+      height="60px"
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+      marginBottom={{ base: "1rem", md: "0" }}
+    >
+      <Heading size="md">Contrats signés</Heading>
+      <Text fontSize="lg">{contratsDuMois}</Text>
+    </Box>
+    <Box 
+      borderWidth="1px" 
+      borderRadius="lg" 
+      padding="5px"
+      backgroundColor={bgColor}
+      width={{ base: "100%", md: "18%" }}
+      height="60px"
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+      marginBottom={{ base: "1rem", md: "0" }}
+    >
+      <Heading size="md">Contrats Premium</Heading>
+      <Text fontSize="lg">{contratsPremium}</Text>
+    </Box>
+    <Box 
+      borderWidth="1px" 
+      borderRadius="lg" 
+      padding="5px"
+      backgroundColor={bgColor}
+      width={{ base: "100%", md: "18%" }}
+      height="60px"
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+      marginBottom={{ base: "1rem", md: "0" }}
+    >
+      <Heading size="md">Contrats Mobile</Heading>
+      <Text fontSize="lg">{contratsMobile}</Text>
+    </Box>
+  </Flex>
+</Stack>
+
     );    
 };
 

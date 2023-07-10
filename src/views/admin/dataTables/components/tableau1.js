@@ -24,6 +24,7 @@ import {
   ModalFooter,
   Radio,
   RadioGroup,
+  Stack
 } from "@chakra-ui/react";
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
@@ -79,6 +80,21 @@ const Tableau = () => {
 
   const [selectedDate, setSelectedDate] = useState(null);
 
+  const [offerFilter, setOfferFilter] = useState('');
+
+  const handleOfferFilterChange = (e) => {
+    setOfferFilter(e.target.value);
+  };
+  
+  const [offerNames, setOfferNames] = useState([]);
+
+  // Créez un effet pour mettre à jour offerNames chaque fois que les enregistrements sont mis à jour
+useEffect(() => {
+  const uniqueOfferNames = Array.from(new Set(records.map(record => record.OfferName__c)));
+  setOfferNames(uniqueOfferNames);
+}, [records]);
+
+
   const openModal = (record) => {
     setCurrentRecord(record);
     setIsOpen(true);
@@ -118,12 +134,11 @@ const Tableau = () => {
   };
 
   useEffect(() => {
-    const filtered = filterRecords(filter.period, filter.status);
+    const filtered = filterRecords(filter.period, filter.status, offerFilter);
     const searched = searchRecords(filtered);
     setSalesCount(filtered.length);
     setFilteredRecords(searched);
-  }, [records, filter, searchValue, selectedMonth, selectedDate]);
-
+  }, [records, filter, searchValue, selectedMonth, selectedDate, offerFilter]);
   
 
   
@@ -257,23 +272,19 @@ const Tableau = () => {
           return true;
       }
     });
-
-    
   
     let filteredByStatus =
-    status === "Tous"
-      ? filteredByPeriod
-      : filteredByPeriod.filter((record) => {
-          if (status === "RaccordOK") {
-            return record.ConnectionStatus__c === "Raccordé";
-          } else if (status === "RaccordKO") {
-            return record.ConnectionStatus__c === "Non raccordé";
-          } else {
-            return record.Status__c === status;
-          }
-        });
-
-
+      status === "Tous"
+        ? filteredByPeriod
+        : filteredByPeriod.filter((record) => {
+            if (status === "RaccordOK") {
+              return record.ConnectionStatus__c === "Raccordé";
+            } else if (status === "RaccordKO") {
+              return record.ConnectionStatus__c === "Non raccordé";
+            } else {
+              return record.Status__c === status;
+            }
+          });
   
     if (hasConnectingDate) {
       filteredByStatus = filteredByStatus.filter((record) => {
@@ -300,38 +311,46 @@ const Tableau = () => {
         return false;
       });
     }
-
+  
     if (selectedDate) {
       const selectedMonth = selectedDate.getMonth();
       const selectedYear = selectedDate.getFullYear();
-      
+  
       filteredByStatus = filteredByStatus.filter((record) => {
         if (record.DateOfPayment__c) {
           const paymentDate = new Date(record.DateOfPayment__c);
           const paymentMonth = paymentDate.getMonth();
           const paymentYear = paymentDate.getFullYear();
-      
+  
           // Check if payment year and month matches the selected year and month - 1
           const isSameYear = selectedYear === paymentYear;
           const isPreviousMonth = (selectedMonth === 0 && paymentMonth === 11 && !isSameYear) 
                                 || (selectedMonth === paymentMonth + 1 && isSameYear);
-    
+  
           return isPreviousMonth;
         }
+  
         return false;
       });
     }
-    
+  
+    // ADD FILTER FOR OFFER NAME
+    if (offerFilter) {
+      filteredByStatus = filteredByStatus.filter((record) => {
+        return record.OfferName__c && (record.OfferName__c.includes(offerFilter));
+      });
+    }
   
     return filteredByStatus;
   };
   
-
-  const handleFilter = (period, status, hasConnectingDate) => {
-    const filtered = filterRecords(period, status, hasConnectingDate);
+  
+  const handleFilter = (period, status, offerType) => {
+    const filtered = filterRecords(period, status, offerType);
     setFilteredRecords(filtered);
-    setFilter({ period, status });
-  };
+    setFilter({ period, status, offerType });
+  };  
+  
 
   useEffect(() => {
   fetchData();
@@ -449,6 +468,7 @@ const sortedRecords = sortRecords(filteredRecords).map((record) => ({
   </Box>
 
   <Box mb={4}>
+  <Text fontWeight="bold" mb={2}>Statut du raccordement :</Text>
   <RadioGroup value={connectionStatus} onChange={(value) => handleConnectionStatusChange(value)}>
   <Radio value="Tous" mr={2}>Tous</Radio>
   <Radio value="Raccordé" mr={2}>Raccordé</Radio>
@@ -456,6 +476,13 @@ const sortedRecords = sortRecords(filteredRecords).map((record) => ({
 </RadioGroup>
 </Box>
 
+<RadioGroup onChange={handleOfferFilterChange} value={offerFilter}>
+      <Stack direction="row">
+        {offerNames.map((offerName, index) => (
+          <Radio key={index} value={offerName}>{offerName}</Radio>
+        ))}
+      </Stack>
+    </RadioGroup>
 
   <Box mb={4} spacing={20}>
     <Text fontWeight="bold">Facturation :</Text>
